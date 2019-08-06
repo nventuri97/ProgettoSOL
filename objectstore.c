@@ -23,7 +23,10 @@ int main(int argc, char *argv[]){
     int p;
     CHECK(p, bind(serverfd, (struct sockaddr*)&ssock_addr, sizeof(ssock_addr)), "bind");
     CHECK(p, listen(serverfd, SOMAXCONN), "listen");
-    
 
+    /*dichiaro i thread dispatcher e worker */
+    pthread_t os_dispatcher, os_worker;
+    CHECK(p, pthread_create(os_dispatcher,NULL, dispatcher, NULL), "thread create");
+    /*DEVO ANCORA DEFINIRE LA DISPATCHER NELLA LIBRERIA!!!!!!!!!!!!! */
     return 0;
 }
