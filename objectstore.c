@@ -9,7 +9,8 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 
-#include<util.h>
+#include <util.h>
+#include <worker.h>
 
 /*variabili condivise tra il main e i vari thread worker */
 static pthread_mutex_t mtx=PTHREAD_MUTEX_INITIALIZER;
@@ -46,7 +47,7 @@ int main(int argc, char *argv[]){
     int clientfd;
     do{
         CHECK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
-        CHECK(p, pthread_create(&os_worker, NULL, worker, NULL), "pthread create");
+        CHECK(p, pthread_create(&os_worker, NULL, Worker, NULL), "pthread create");
     }while(True);
     
     return 0;
