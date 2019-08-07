@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #define SOCKNAME "./objectstore.sock"
 #define True 1
