@@ -1,16 +1,16 @@
 #define _POSIX_C_SOURCE 200112L
-#include <unistd.h>
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/wait.h>
-#include <sys/uio.h>
-#include <sys/socket.h>
-#include <fcntl.h>
+#include<unistd.h>
+#include<assert.h>
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<sys/wait.h>
+#include<sys/uio.h>
+#include<sys/socket.h>
+#include<fcntl.h>
 
-#include <util.h>
-#include <worker.h>
+#include<util.h>
+#include<worker.h>
 
 /*variabili condivise tra il main e i vari thread worker */
 static pthread_mutex_t mtx=PTHREAD_MUTEX_INITIALIZER;
