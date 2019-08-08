@@ -20,7 +20,7 @@ int os_connect(char *name){
     if(err==-1)
         return False;
     else{
-        /*Devo inviare un messaggio al server per far creare la cartella del client name*/
+        /*Devo inviare un messaggio (protocollo di comunicazione) al server per far creare la cartella del client name*/
         return True;
     }
 }
