@@ -4,7 +4,7 @@
 #include<util.h>
 #include<sys/socket.h>
 
-int os_connet(char *name);
+int os_connect(char *name);
 
 int os_store(char *name, void *block, size_t len);
 
