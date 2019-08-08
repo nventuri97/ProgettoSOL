@@ -16,9 +16,9 @@
 
 static int success, failure, tot_test;
 
-void store_test(char *objname);
-void retrieve_test(char *objname);
-void delete_test(char *objname);
+void store_test();
+void retrieve_test();
+void delete_test();
 
 int main(int argc, char *argv[]){
     if(argc<3){
