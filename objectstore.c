@@ -20,7 +20,7 @@ static int conn_client, tot_size, n_obj;
 
 int main(int argc, char *argv[]){
     /*creazione della server socket */
-    long serverfd;
+    int serverfd;
     CHECK(serverfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
 
     struct sockaddr_un ssock_addr;

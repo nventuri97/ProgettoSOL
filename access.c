@@ -7,7 +7,7 @@
 
 /*Dichiaro come variabile globale il file descriptor in quanto dovrà essere usato in più funzioni,
 non solamente nella os_connect */
-static long sockfd;
+static int sockfd;
 
 int os_connect(char *name){
     struct sockaddr_un serveraddr;
