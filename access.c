@@ -43,8 +43,10 @@ int os_connect(char *name){
         CHECK(err, readn(sockfd, (char *) answer, l*sizeof(char)+1), "readn");
         if(strncmp(answer,"OK", 2)==0)
             return True;
-        else
+        else{
+            fprintf(stderr, "Connessione: %s\n", answer);
             return False;
+        }
     }
 }
 
@@ -61,5 +63,22 @@ int os_delete(char *name){
 }
 
 int os_disconnect(){
+    int err;
+    CHECK(err, writen(sockfd, "LEAVE", 6*sizeof(char)), "writen");
+    if(err==-1)
+        return False;
 
+    char answer[3];
+    CHECK(err, readn(sockfd, (char*) answer, 3*sizeof(char)), "readn");
+    if(err==-1)
+        return False;
+    fprintf(stdout, "Disconnessione: %s\n", answer);
+    CHECK(err, close(sockfd), "close");
+    if(err==-1)
+        return False;
+    return True;
+}
+
+int main(){
+    return 0;
 }
