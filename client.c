@@ -1,5 +1,4 @@
 #define _POSIX_C_SOURCE 200112L
-#include<unistd.h>
 #include<assert.h>
 #include<stdio.h>
 #include<string.h>

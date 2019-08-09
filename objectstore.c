@@ -1,5 +1,4 @@
 #define _POSIX_C_SOURCE 200112L
-#include<unistd.h>
 #include<assert.h>
 #include<stdio.h>
 #include<string.h>
@@ -21,7 +20,7 @@ static int conn_client, tot_size, n_obj;
 
 int main(int argc, char *argv[]){
     /*creazione della server socket */
-    int serverfd;
+    long serverfd;
     CHECK(serverfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
 
     struct sockaddr_un ssock_addr;

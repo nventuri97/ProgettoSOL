@@ -5,9 +5,11 @@
 #include<sys/uio.h>
 #include<string.h>
 
+/*Dichiaro come variabile globale il file descriptor in quanto dovrà essere usato in più funzioni,
+non solamente nella os_connect */
+static long sockfd;
 
 int os_connect(char *name){
-    int sockfd;
     struct sockaddr_un serveraddr;
     CHECK(sockfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
     memset(&serveraddr, '0', sizeof(serveraddr));
@@ -20,8 +22,29 @@ int os_connect(char *name){
     if(err==-1)
         return False;
     else{
-        /*Devo inviare un messaggio (protocollo di comunicazione) al server per far creare la cartella del client name*/
-        return True;
+        /*Se la connect è andata a buon fine allora */
+        char *msg=(char*) calloc(9+strlen(name)+1, sizeof(char));
+        strncpy(msg, "REGISTER ", 9);
+        strncat(msg, name, strlen(name));
+
+        /*Richiesta di iscrizione*/
+        CHECK(err, writen(sockfd,(char *) msg, strlen(msg)*sizeof(char)), "writen");
+        if(err==-1)
+            return False;
+
+        /*Messaggio di risposta*/
+        int l;
+        char *answer=(char*) calloc(l,sizeof(char));
+        /*aspetto con il primo messaggio la lunghezza effettiva della risposta*/
+        CHECK(err, readn(sockfd, (int *) &l, sizeof(int)), "readn");
+        if(err==-1)
+            return False;
+        
+        CHECK(err, readn(sockfd, (char *) answer, l*sizeof(char)+1), "readn");
+        if(strncmp(answer,"OK", 2)==0)
+            return True;
+        else
+            return False;
     }
 }
 
