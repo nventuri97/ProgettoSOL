@@ -12,12 +12,6 @@
 #include<util.h>
 #include<worker.h>
 
-/*variabili condivise tra il main e i vari thread worker */
-static pthread_mutex_t mtx=PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t mod=PTHREAD_COND_INITIALIZER;
-
-//#client connessi, size totale dell'object store, #totale di oggetti
-static int conn_client, tot_size, n_obj;
 
 int main(int argc, char *argv[]){
     /*creazione della server socket */
@@ -36,10 +30,17 @@ int main(int argc, char *argv[]){
     /*creazione della cartella DATA */
     CHECK(p, mkdir("data", 0700), "mkdir");
 
-    /*inizializzo le variabili globali tutte a 0*/
+    /*devo lavorare in mutua esclusione sulle variabili condivise*/
+    pthread_mutex_lock(&mtx);
+    while(!ready)
+        pthread_cond_wait(&mod, &mtx);
+    /*inizializzo le variabili condivise tutte a 0*/
     conn_client=0;
     tot_size=0;
     n_obj=0;
+
+    pthread_cond_signal(&mod);
+    pthread_mutex_unlock(&mtx);
 
     /*dichiaro il worker */
     pthread_t os_worker;

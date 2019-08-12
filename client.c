@@ -11,8 +11,6 @@
 #include<util.h>
 #include<access.h>
 
-#define MAXNAME 100
-
 static int success, failure, tot_test;
 
 void store_test();
