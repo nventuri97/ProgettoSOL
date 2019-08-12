@@ -35,9 +35,13 @@ int main(int argc, char *argv[]){
     while(!ready)
         pthread_cond_wait(&mod, &mtx);
     /*inizializzo le variabili condivise tutte a 0*/
+    /*rendo ready occupata, in modo tale che se qualcuno volesse modificare si blocca sulla wait*/
+    ready=0;
     conn_client=0;
     tot_size=0;
     n_obj=0;
+    /*libero ready così chi deve lavorare può lavorare*/
+    ready=1;
 
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);

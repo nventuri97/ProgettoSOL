@@ -21,6 +21,8 @@ typedef struct worker{
     pthread_t pid;
 }worker_t;
 
+worker_t *worker_l;
+
 void *Worker(int client_fd);
 
 #endif

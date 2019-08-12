@@ -5,7 +5,25 @@
 #include <worker.h>
 
 void *Worker(int client_fd){
+    pthread_mutex_lock(&mtx);
+    while(!ready)
+        pthread_cond_wait(&mod,&mtx);
+    
+    ready=0;
+    /*devo aggiungere un thread worker alla lista*/
+    worker_t *new_worker=(worker_t *) malloc(sizeof(worker_t));
+    if(worker_l!=NULL)
+        new_worker->prv=worker_l;
+    new_worker->nxt=NULL;
+    new_worker->connected=1;
+    new_worker->pid=getpid();
+    new_worker->workerfd=client_fd;
+    worker_l=new_worker;
+    ready=1;
 
+    pthread_cond_signal(&mod);
+    pthread_mutex_unlock(&mtx);
+    
 }
 
 int main(){
