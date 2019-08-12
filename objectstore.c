@@ -7,6 +7,7 @@
 #include<sys/uio.h>
 #include<sys/socket.h>
 #include<fcntl.h>
+#include<poll.h>
 
 #include<util.h>
 #include<worker.h>
@@ -44,10 +45,10 @@ int main(int argc, char *argv[]){
     pthread_t os_worker;
 
     int clientfd;
-    do{
+    while(True){
         CHECK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
-        CHECK(p, pthread_create(&os_worker, NULL, Worker, NULL), "pthread create");
-    }while(True);
+        CHECK(p, pthread_create(&os_worker, NULL, Worker(clientfd), NULL), "pthread create");   
+    }
     
     return 0;
 }

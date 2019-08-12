@@ -8,6 +8,7 @@
 #include<stdlib.h>
 #include<pthread.h>
 #include<unistd.h>
+#include<signal.h>
 
 #define SOCKNAME "./objectstore.sock"
 #define True 1

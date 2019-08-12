@@ -4,8 +4,7 @@
 #include <fcntl.h>
 #include <worker.h>
 
-void *Worker(void *arg){
-
+void *Worker(int client_fd){
 
 }
 
