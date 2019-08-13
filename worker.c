@@ -29,6 +29,25 @@ void *Worker(int client_fd){
     int p;
     CHECK(p, readn(client_fd, cl_msg, strlen(cl_msg)*sizeof(char)+1), "readn");
     
+    /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
+    char *cont;
+    char *keyword=strtok_r(keyword, " ", &cont);
+    if(strcmp(keyword,"REGISTER")==0)
+        os_register(cont);                 //ancora da definire
+    else if(strcmp(keyword,"STORE")==0)
+        os_store(cont);                    //ancora da definire
+    else if(strcmp(keyword,"RETRIEVE")==0)
+        os_retrieve(cont);                 //ancora da definire
+    else if(strcmp(keyword,"DELETE")==0)
+        os_delete(cont);                   //ancora da definire
+    else if(strcmp(keyword,"LEAVE")==0)
+        os_leave();                        //ancora da definire
+    else{
+        char *answer_msg;
+        strcpy(answer_msg, "KO keyword errata");
+        CHECK(p, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "writen");
+    }
+    
 }
 
 int main(){

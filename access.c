@@ -3,7 +3,6 @@
 #include<sys/wait.h>
 #include<fcntl.h>
 #include<sys/uio.h>
-#include<string.h>
 
 /*Dichiaro come variabile globale il file descriptor in quanto dovrà essere usato in più funzioni,
 non solamente nella os_connect */
