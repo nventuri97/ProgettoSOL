@@ -3,6 +3,7 @@
 
 #define _POSIX_C_SOURCE 200112L
 #include<util.h>
+#include<dirent.h>
 
 /*variabili condivise tra il main e i vari thread worker */
 static pthread_mutex_t mtx=PTHREAD_MUTEX_INITIALIZER;

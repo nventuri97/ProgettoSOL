@@ -11,7 +11,7 @@
 #include<unistd.h>
 #include<signal.h>
 
-#define SOCKNAME "./objectstore.sock"
+#define SOCKNAME "./objstore.sock"
 #define True 1
 #define False 0
 #define MAXNAME 100

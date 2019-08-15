@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
     CHECK(p, listen(serverfd, SOMAXCONN), "listen");
 
     /*creazione della cartella DATA */
-    CHECK(p, mkdir("data", 0700), "mkdir");             //posso mettere anche 0777
+    CHECK(p, mkdir("data", 0777), "mkdir");             //posso mettere anche 0700
 
     /*devo lavorare in mutua esclusione sulle variabili condivise*/
     pthread_mutex_lock(&mtx);
