@@ -84,6 +84,12 @@ void os_register(char *cont, int client_fd){
     pthread_mutex_unlock(&mtx);
 }
 
+void os_disconnect(int client_fd){
+    int p;
+    CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
+    CHECK(p, close(client_fd), "close");
+}
+
 int main(){
     return 0;
 }
