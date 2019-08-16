@@ -42,7 +42,8 @@ int main(int argc, char *argv[]){
         err=os_connect(name);
         i++;
     }
-    int action=atoi(argv[3]);
+    char *end;
+    long int action=strtol(argv[3], &end, 10);
 
     success=0;
     failure=0;

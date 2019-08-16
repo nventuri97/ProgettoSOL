@@ -27,19 +27,15 @@ int os_connect(char *name){
         strncat(msg, name, strlen(name));
 
         /*Richiesta di iscrizione*/
-        CHECK(err, writen(sockfd,(char *) msg, strlen(msg)*sizeof(char)), "writen");
+        CHECKSOCK(err, writen(sockfd,(char *) msg, strlen(msg)*sizeof(char)), "writen");
         if(err==-1)
             return False;
 
         /*Messaggio di risposta*/
-        int l;
-        char *answer=(char*) calloc(l,sizeof(char));
+        char answer[MAXBUFSIZE];
         /*aspetto con il primo messaggio la lunghezza effettiva della risposta*/
-        CHECK(err, readn(sockfd, (int *) &l, sizeof(int)), "readn");
-        if(err==-1)
-            return False;
         
-        CHECK(err, readn(sockfd, (char *) answer, l*sizeof(char)+1), "readn");
+        CHECKSOCK(err, readn(sockfd, (char *) answer, MAXBUFSIZE), "readn");
         if(strncmp(answer,"OK", 2)==0)
             return True;
         else{
@@ -50,11 +46,58 @@ int os_connect(char *name){
 }
 
 int os_store(char *name, void *block, size_t len){
+    /*Devo decidere se mettere i controlli sul nome e su block*/
 
+    /*Messaggio dove inserirò STORE name len \n block*/
+    char *msg=(char*) calloc(MAXBUFSIZE+len+1, sizeof(char));
+    int err=sprintf(msg, "%s %s %ld \n %s", "STORE", name, len, (char *)block);
+
+    size_t msglen=strlen(msg);
+    /*Invio il file da salvare*/
+    CHECKSOCK(err, writen(sockfd, msg, msglen), "writen");
+
+    /*Messaggio di risposta del server*/
+    char answer[MAXBUFSIZE];
+    CHECKSOCK(err, readn(sockfd, answer, MAXBUFSIZE), "readn");
+
+    if(strncmp(answer, "OK", 2)==0)
+        return True;
+    else{
+        fprintf(stderr, "Salvataggio: %s\n", answer);
+        return False;
+    }
 }
 
 void *os_retrieve(char *name){
+    /*Devo decidere se mettere i controlli sul nome del file*/
 
+    /*Messaggio dove inserisco retrieve e nome del file da recuperare*/
+    char msg[9+strlen(name)+1];
+    strncpy(msg, "RETRIEVE ", 9);
+    strcat(msg,name);
+
+    int err;
+    /*Invio il messaggio al server*/
+    CHECKSOCK(err, writen(sockfd, msg, strlen(msg)), "writen");
+
+    /*Messaggio di risposta dal server*/
+    char answer[MAXBUFSIZE];
+    CHECKSOCK(err, readn(sockfd, answer, MAXBUFSIZE), "readn");
+
+    char *cont=NULL;
+    char *ansmsg=strtok_r(answer, " ", &cont);
+    void *file=NULL;
+
+    if(strcmp(ansmsg,"DATA")==0){
+        /*Verifico che cont contenga i dati necessari*/
+        if(cont!=NULL){
+            char *end, *support;
+            /*Prendo la lunghezza del essaggio*/
+            support=strtok_r(cont, "\n", &cont);
+            long int len=strtol(support, &end, 10);
+
+        }
+    }
 }
 
 int os_delete(char *name){

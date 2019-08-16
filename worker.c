@@ -84,6 +84,18 @@ void os_register(char *cont, int client_fd){
     pthread_mutex_unlock(&mtx);
 }
 
+void os_store(char *cont, int client_fd){
+
+}
+
+void os_retrieve(char *cont, int client_fd){
+
+}
+
+void os_delete(char *cont, int client_fd){
+
+}
+
 void os_leave(int client_fd){
     int p;
     CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");

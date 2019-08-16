@@ -15,6 +15,7 @@
 #define True 1
 #define False 0
 #define MAXNAME 100
+#define MAXBUFSIZE 180
 
 #define CHECKSOCK(x,f,m) \
     if((x=f)==-1){   \
