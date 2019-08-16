@@ -16,7 +16,7 @@
 int main(int argc, char *argv[]){
     /*creazione della server socket */
     int serverfd;
-    CHECK(serverfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
+    CHECKSOCK(serverfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
 
     struct sockaddr_un ssock_addr;
     memset(&ssock_addr, '0', sizeof(ssock_addr));
@@ -24,8 +24,8 @@ int main(int argc, char *argv[]){
     strncpy(ssock_addr.sun_path, SOCKNAME, strlen(SOCKNAME)+1);
 
     int p;
-    CHECK(p, bind(serverfd, (struct sockaddr*)&ssock_addr, sizeof(ssock_addr)), "bind");
-    CHECK(p, listen(serverfd, SOMAXCONN), "listen");
+    CHECKSOCK(p, bind(serverfd, (struct sockaddr*)&ssock_addr, sizeof(ssock_addr)), "bind");
+    CHECKSOCK(p, listen(serverfd, SOMAXCONN), "listen");
 
     /*creazione della cartella DATA */
     CHECK(p, mkdir("data", 0777), "mkdir");             //posso mettere anche 0700
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
 
     int clientfd;
     while(True){
-        CHECK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
+        CHECKSOCK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
         CHECK(p, pthread_create(&os_worker, NULL, Worker(clientfd), NULL), "pthread create");   
     }
     

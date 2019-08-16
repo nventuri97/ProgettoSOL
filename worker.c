@@ -87,7 +87,7 @@ void os_register(char *cont, int client_fd){
 void os_leave(int client_fd){
     int p;
     CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
-    CHECK(p, close(client_fd), "close");
+    CHECKSOCK(p, close(client_fd), "close");
 }
 
 int main(){
