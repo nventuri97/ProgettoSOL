@@ -96,8 +96,13 @@ void *os_retrieve(char *name){
             support=strtok_r(cont, "\n", &cont);
             long int len=strtol(support, &end, 10);
 
+            file=(char*) calloc(len, sizeof(char));
+            CHECKSOCK(err, readn(sockfd, file, len), "readn");
         }
-    }
+        return file;
+    } else if(strcmp(ansmsg, "KO")==0)
+        fprintf(stderr, "Lettura: KO %s\n", cont);
+    return file;
 }
 
 int os_delete(char *name){
