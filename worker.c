@@ -84,7 +84,7 @@ void Wregister(char *cont, int client_fd){
     pthread_mutex_unlock(&mtx);
 }
 
-void store(char *cont, int client_fd){
+void Wstore(char *cont, int client_fd){
 
 }
 
