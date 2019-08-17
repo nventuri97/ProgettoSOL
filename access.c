@@ -50,7 +50,8 @@ int os_store(char *name, void *block, size_t len){
 
     /*Messaggio dove inserirò STORE name len \n block*/
     char *msg=(char*) calloc(MAXBUFSIZE+len+1, sizeof(char));
-    int err=sprintf(msg, "%s %s %ld \n %s", "STORE", name, len, (char *)block);
+    int err;
+    CHECK(err, sprintf(msg, "%s %s %ld \n %s", "STORE", name, len, (char *)block), "sprintf");
 
     size_t msglen=strlen(msg);
     /*Invio il file da salvare*/
@@ -100,13 +101,29 @@ void *os_retrieve(char *name){
             CHECKSOCK(err, readn(sockfd, file, len), "readn");
         }
         return file;
-    } else if(strcmp(ansmsg, "KO")==0)
+    } else
         fprintf(stderr, "Lettura: KO %s\n", cont);
     return file;
 }
 
 int os_delete(char *name){
+    /*Devo decidere se mettere i controlli sul nome del file*/
 
+    /*Messaggio dove inserisco delete e nome del file da recuperare*/
+    char msg[7+strlen(name)];
+    int err;
+    CHECK(err, sprintf(msg, "%s %s\n", "DELETE", name), "sprintf");
+
+    /*Messaggio di risposta dal server*/
+    char answer[MAXBUFSIZE];
+    CHECKSOCK(err, readn(sockfd, answer, MAXBUFSIZE), "readn");
+    
+    if(strncmp(answer, "OK", 2)==0)
+        return True;
+    else{
+        fprintf(stderr, "Rimozione: %s", answer);
+        return False;
+    }
 }
 
 int os_disconnect(){

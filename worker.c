@@ -33,15 +33,15 @@ void *Worker(int client_fd){
     char *cont;
     char *keyword=strtok_r(keyword, " ", &cont);
     if(strcmp(keyword,"REGISTER")==0)
-        os_register(cont, client_fd);
+        registerWregister(cont, client_fd);
     else if(strcmp(keyword,"STORE")==0)
-        os_store(cont, client_fd);                    //ancora da definire
+        Wstore(cont, client_fd);                    //ancora da definire
     else if(strcmp(keyword,"RETRIEVE")==0)
-        os_retrieve(cont, client_fd);                 //ancora da definire
+        Wretrieve(cont, client_fd);                 //ancora da definire
     else if(strcmp(keyword,"DELETE")==0)
-        os_delete(cont, client_fd);                   //ancora da definire
+        Wdelete(cont, client_fd);                   //ancora da definire
     else if(strcmp(keyword,"LEAVE")==0)
-        os_leave(client_fd);                        //ancora da definire
+        Wleave(client_fd);                        //ancora da definire
     else{
         char *answer_msg;
         strcpy(answer_msg, "KO keyword errata");
@@ -49,7 +49,7 @@ void *Worker(int client_fd){
     }
 }
 
-void os_register(char *cont, int client_fd){
+void Wregister(char *cont, int client_fd){
     char *cl_name=strtok_r(cont,"\n", &cont);
     /*Apro la cartella data, non importa la mutua esclusione in quanto possono lavorarci più worker contemporaneamente*/
     DIR *data=opendir("./data");
@@ -84,19 +84,19 @@ void os_register(char *cont, int client_fd){
     pthread_mutex_unlock(&mtx);
 }
 
-void os_store(char *cont, int client_fd){
+void store(char *cont, int client_fd){
 
 }
 
-void os_retrieve(char *cont, int client_fd){
+void Wretrieve(char *cont, int client_fd){
 
 }
 
-void os_delete(char *cont, int client_fd){
+void Wdelete(char *cont, int client_fd){
 
 }
 
-void os_leave(int client_fd){
+void Wleave(int client_fd){
     int p;
     CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
     CHECKSOCK(p, close(client_fd), "close");
