@@ -5,25 +5,6 @@
 #include <worker.h>
 
 void *Worker(int client_fd){
-    pthread_mutex_lock(&mtx);
-    while(!ready)
-        pthread_cond_wait(&mod,&mtx);
-    
-    ready=0;
-    /*devo aggiungere un thread worker alla lista*/
-    worker_t *new_worker=(worker_t *) malloc(sizeof(worker_t));
-    if(worker_l!=NULL)
-        new_worker->prv=worker_l;
-    new_worker->nxt=NULL;
-    new_worker->connected=1;
-    new_worker->tid=getpid();
-    new_worker->workerfd=client_fd;
-    worker_l=new_worker;
-
-    ready=1;
-    pthread_cond_signal(&mod);
-    pthread_mutex_unlock(&mtx);
-    
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
     char cl_msg[9+MAXNAME+1];
     int p;
@@ -61,17 +42,30 @@ void Wregister(char *cont, int client_fd){
     while(!ready)
         pthread_cond_wait(&mod,&mtx);
     ready=0;
-    
+
     while(curr->_name!=cl_name && curr->nxt!=NULL)
         curr=curr->nxt;
     /*Nuovo cliente*/
     if(curr==NULL){
+        /*devo aggiungere un thread worker alla lista*/
+        worker_t *new_worker=(worker_t *) malloc(sizeof(worker_t));
+        if(worker_l!=NULL)
+            new_worker->prv=worker_l;
+        new_worker->nxt=NULL;
+        new_worker->connected=1;
+        new_worker->workerfd=client_fd;
+        strcpy(new_worker->_name,cl_name);
+        worker_l=new_worker;
+
         /*Creo la cartella del client in cui andrò a inserire i file*/
         mkdir(cl_name, 0777);
         /*Invio il messaggio di riuscita connessione*/
         CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
         conn_client++;
     } else if(curr->connected==0){
+        curr->connected=1;
+        curr->workerfd=client_fd;
+
         /*Invio il messaggio di riuscita connessione, cliente già connesso precedentemente*/
         CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
         conn_client++;
