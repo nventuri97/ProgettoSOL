@@ -10,7 +10,7 @@ static int sockfd;
 
 int os_connect(char *name){
     struct sockaddr_un serveraddr;
-    CHECK(sockfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
+    CHECKSOCK(sockfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
     memset(&serveraddr, '0', sizeof(serveraddr));
 
     serveraddr.sun_family=AF_UNIX;
@@ -27,7 +27,7 @@ int os_connect(char *name){
         strncat(msg, name, strlen(name));
 
         /*Richiesta di iscrizione*/
-        CHECKSOCK(err, writen(sockfd,(char *) msg, strlen(msg)*sizeof(char)), "writen");
+        CHECK(err, writen(sockfd,(char *) msg, strlen(msg)*sizeof(char)), "writen");
         if(err==-1)
             return False;
 
@@ -35,7 +35,7 @@ int os_connect(char *name){
         char answer[MAXBUFSIZE];
         /*aspetto con il primo messaggio la lunghezza effettiva della risposta*/
         
-        CHECKSOCK(err, readn(sockfd, (char *) answer, MAXBUFSIZE), "readn");
+        CHECK(err, readn(sockfd, (char *) answer, MAXBUFSIZE), "readn");
         if(strncmp(answer,"OK", 2)==0)
             return True;
         else{
@@ -55,11 +55,11 @@ int os_store(char *name, void *block, size_t len){
 
     size_t msglen=strlen(msg);
     /*Invio il file da salvare*/
-    CHECKSOCK(err, writen(sockfd, msg, msglen), "writen");
+    CHECK(err, writen(sockfd, msg, msglen), "writen");
 
     /*Messaggio di risposta del server*/
     char answer[MAXBUFSIZE];
-    CHECKSOCK(err, readn(sockfd, answer, MAXBUFSIZE), "readn");
+    CHECK(err, readn(sockfd, answer, MAXBUFSIZE), "readn");
 
     if(strncmp(answer, "OK", 2)==0)
         return True;
@@ -79,11 +79,11 @@ void *os_retrieve(char *name){
 
     int err;
     /*Invio il messaggio al server*/
-    CHECKSOCK(err, writen(sockfd, msg, strlen(msg)), "writen");
+    CHECK(err, writen(sockfd, msg, strlen(msg)), "writen");
 
     /*Messaggio di risposta dal server*/
     char answer[MAXBUFSIZE];
-    CHECKSOCK(err, readn(sockfd, answer, MAXBUFSIZE), "readn");
+    CHECK(err, readn(sockfd, answer, MAXBUFSIZE), "readn");
 
     char *cont=NULL;
     char *ansmsg=strtok_r(answer, " ", &cont);
@@ -98,7 +98,7 @@ void *os_retrieve(char *name){
             long int len=strtol(support, &end, 10);
 
             file=(char*) calloc(len, sizeof(char));
-            CHECKSOCK(err, readn(sockfd, file, len), "readn");
+            CHECK(err, readn(sockfd, file, len), "readn");
         }
         return file;
     } else
@@ -116,7 +116,7 @@ int os_delete(char *name){
 
     /*Messaggio di risposta dal server*/
     char answer[MAXBUFSIZE];
-    CHECKSOCK(err, readn(sockfd, answer, MAXBUFSIZE), "readn");
+    CHECK(err, readn(sockfd, answer, MAXBUFSIZE), "readn");
     
     if(strncmp(answer, "OK", 2)==0)
         return True;
@@ -137,7 +137,7 @@ int os_disconnect(){
     if(err==-1)
         return False;
     fprintf(stdout, "Disconnessione: %s\n", answer);
-    CHECK(err, close(sockfd), "close");
+    CHECKSOCK(err, close(sockfd), "close");
     if(err==-1)
         return False;
     return True;

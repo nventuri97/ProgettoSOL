@@ -16,7 +16,7 @@ void *Worker(int client_fd){
         new_worker->prv=worker_l;
     new_worker->nxt=NULL;
     new_worker->connected=1;
-    new_worker->pid=getpid();
+    new_worker->tid=getpid();
     new_worker->workerfd=client_fd;
     worker_l=new_worker;
 
@@ -54,31 +54,34 @@ void Wregister(char *cont, int client_fd){
     /*Apro la cartella data, non importa la mutua esclusione in quanto possono lavorarci più worker contemporaneamente*/
     DIR *data=opendir("./data");
     struct dirent* file;
+    worker_t *curr=worker_l;
 
     int p;
     pthread_mutex_lock(&mtx);
     while(!ready)
         pthread_cond_wait(&mod,&mtx);
     ready=0;
-    /*
-    * Devo ancora gestire il caso in cui l'utente tenti di connettersi con il nome di un utente già connesso,
-    * devo controllare che ci sia già la cartella e poi nel caso il bit connected relativo al nome nella hash table
-    * ancora da implementare
-    */
-    while((errno=0, file=readdir(data))!=NULL){
-        if(strcmp(file->d_name, cl_name)==0){
-            /*Invio il messaggio di riuscita connessione, cliente già connesso precedentemente*/
-            CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
-            break;
-        }
-    }
+    
+    while(curr->_name!=cl_name && curr->nxt!=NULL)
+        curr=curr->nxt;
     /*Nuovo cliente*/
-    if(p!=0){
+    if(curr==NULL){
         /*Creo la cartella del client in cui andrò a inserire i file*/
-            mkdir(cl_name, 0777);
+        mkdir(cl_name, 0777);
         /*Invio il messaggio di riuscita connessione*/
-            CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
+        CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
+        conn_client++;
+    } else if(curr->connected==0){
+        /*Invio il messaggio di riuscita connessione, cliente già connesso precedentemente*/
+        CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
+        conn_client++;
+    } else if(curr->connected==1){
+        /*Invio messaggio di fallimento di connessione*/
+        char *response;
+        int err=sprintf(response, "%s", "KO, client già connesso con questo nome\n");
+        CHECK(p, writen(client_fd, response, strlen(response)), "writen");
     }
+
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
@@ -97,6 +100,22 @@ void Wdelete(char *cont, int client_fd){
 }
 
 void Wleave(int client_fd){
+    /*Gestisco la mia lista in mutua esclusione*/
+    worker_t *curr=worker_l;
+    pthread_mutex_lock(&mtx);
+    while(!ready)
+        pthread_cond_wait(&mod,&mtx);
+    ready=0;
+
+    while(curr->workerfd!=client_fd)
+        curr=curr->nxt;
+    curr->connected=0;
+    conn_client--;
+
+    ready=1;
+    pthread_cond_signal(&mod);
+    pthread_mutex_unlock(&mtx);
+
     int p;
     CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
     CHECKSOCK(p, close(client_fd), "close");

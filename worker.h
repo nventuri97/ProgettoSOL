@@ -19,7 +19,7 @@ typedef struct worker{
     int workerfd;
     int connected;
     char _name[MAXNAME+1];
-    pthread_t pid;
+    pthread_t tid;
 }worker_t;
 
 worker_t *worker_l;
