@@ -22,12 +22,11 @@ int os_connect(char *name){
         return False;
     else{
         /*Se la connect è andata a buon fine allora */
-        char *msg=(char*) calloc(9+strlen(name)+1, sizeof(char));
-        strncpy(msg, "REGISTER ", 9);
-        strncat(msg, name, strlen(name));
+        char *msg;
+        CHECK(err, sprintf(msg, "REGISTER %s \n", name), "sprintf");
 
         /*Richiesta di iscrizione*/
-        CHECK(err, writen(sockfd,(char *) msg, strlen(msg)*sizeof(char)), "writen");
+        CHECK(err, writen(sockfd,(char *) msg, strlen(msg)), "writen");
         if(err==-1)
             return False;
 
@@ -81,14 +80,12 @@ void *os_retrieve(char *name){
     /*Devo decidere se mettere i controlli sul nome del file*/
 
     /*Messaggio dove inserisco retrieve e nome del file da recuperare*/
-    char msg[9+strlen(name)+1];
-    strncpy(msg, "RETRIEVE ", 9);
-    strcat(msg,name);
-
     int err;
-    /*Invio il messaggio al server*/
+    char *msg;
+    CHECK(err, sprintf(msg, "RETRIVE %s \n", name), "sprintf");
+    /*Invio il messaggio al server*/int err;
     CHECK(err, writen(sockfd, msg, strlen(msg)), "writen");
-
+ 
     /*Messaggio di risposta dal server*/
     char answer[MAXBUFSIZE];
     CHECK(err, readn(sockfd, answer, MAXBUFSIZE), "readn");
@@ -124,7 +121,7 @@ int os_delete(char *name){
     /*Messaggio dove inserisco delete e nome del file da recuperare*/
     char msg[7+strlen(name)];
     int err;
-    CHECK(err, sprintf(msg, "%s %s\n", "DELETE", name), "sprintf");
+    CHECK(err, sprintf(msg, "%s %s \n", "DELETE", name), "sprintf");
 
     /*Messaggio di risposta dal server*/
     char answer[MAXBUFSIZE];
@@ -143,9 +140,9 @@ int os_disconnect(){
         fprintf(stderr, "Socket non ancora aperta");
         return False;
     }
-    
+
     int err;
-    CHECK(err, writen(sockfd, "LEAVE", 6*sizeof(char)), "writen");
+    CHECK(err, writen(sockfd, "LEAVE \n", 7), "writen");
     if(err==-1)
         return False;
 

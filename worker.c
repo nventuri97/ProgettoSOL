@@ -6,9 +6,9 @@
 
 void *Worker(int client_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
-    char cl_msg[9+MAXNAME+1];
+    char cl_msg[9+MAXNAME+2];
     int p;
-    CHECK(p, readn(client_fd, cl_msg, strlen(cl_msg)*sizeof(char)+1), "readn");
+    CHECK(p, readn(client_fd, cl_msg, strlen(cl_msg)+1), "readn");
     
     /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
     char *cont;
