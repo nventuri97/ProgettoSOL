@@ -107,7 +107,7 @@ void Wstore(char *cont, int client_fd){
     char *buffer=(char*) calloc(len+1, sizeof(char));
     int f_fd;
     /*Apro il file in lettura/scrittura con l'opzione che deve essere creato se non esistente*/
-    CHECK(f_fd, open(filename, O_CREAT|O_RDWR|O_APPEND, 0777), "open");
+    CHECK(f_fd, open(filename, O_CREAT|O_RDWR, 0777), "open");
 
     CHECK(err, readn(client_fd, buffer, len+1), "readn");
     CHECK(err, write(f_fd, buffer, strlen(buffer)), "write");
@@ -120,7 +120,7 @@ void Wstore(char *cont, int client_fd){
 
     if(err==-1)
         return False;
-    return True   
+    return True;
 }
 
 void Wretrieve(char *cont, int client_fd){
