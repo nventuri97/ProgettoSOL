@@ -14,7 +14,7 @@ void *Worker(int client_fd){
     char *cont;
     char *keyword=strtok_r(keyword, " ", &cont);
     if(strcmp(keyword,"REGISTER")==0)
-        registerWregister(cont, client_fd);
+        Wregister(cont, client_fd);
     else if(strcmp(keyword,"STORE")==0)
         Wstore(cont, client_fd);                    //ancora da definire
     else if(strcmp(keyword,"RETRIEVE")==0)
@@ -32,6 +32,7 @@ void *Worker(int client_fd){
 
 void Wregister(char *cont, int client_fd){
     char *cl_name=strtok_r(cont,"\n", &cont);
+    char *userpath;
     /*Apro la cartella data, non importa la mutua esclusione in quanto possono lavorarci più worker contemporaneamente*/
     DIR *data=opendir("./data");
     struct dirent* file;
@@ -58,7 +59,8 @@ void Wregister(char *cont, int client_fd){
         worker_l=new_worker;
 
         /*Creo la cartella del client in cui andrò a inserire i file*/
-        mkdir(cl_name, 0777);
+        CHECK(p, sprintf(userpath, "%s/%s", "data", cl_name), "sprintf");
+        mkdir(userpath, 0777);
         /*Invio il messaggio di riuscita connessione*/
         CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
         conn_client++;
@@ -83,12 +85,29 @@ void Wregister(char *cont, int client_fd){
 
 void Wstore(char *cont, int client_fd){
     char *filename;
-    worker_t *curr;
+    worker_t *curr=worker_l;
+
+    /*Lavoro in mutua esclusione*/
+    pthread_mutex_lock(&mtx);
+    while(!ready)
+        pthread_cond_wait(&mod,&mtx);
+
+    ready=0;
     while(curr->workerfd!=client_fd)
         curr=curr->nxt;
     int err;
+    /*Creo il nome del file inserendolo direttamente nella cartella del client*/
     CHECK(err, sprintf(filename, "%s/%s/%s", "data", curr->_name, strtok_r(cont, " ", &cont)), "sprintf");
-    
+    char *end; 
+    long int len=strtol(strtok_r(cont, " ", &cont), &end, 10);
+    tot_size+=len;
+
+    char *buffer=(char*) calloc(len+1, sizeof(char));
+    int f_fd;
+    /*Apro il file in lettura/scrittura con l'opzione che deve essere creato se non esistente*/
+    CHECK(f_fd, open(filename, O_CREAT|O_RDWR, 0777), "open");
+
+
 }
 
 void Wretrieve(char *cont, int client_fd){
