@@ -8,11 +8,13 @@ void *Worker(int client_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
     char cl_msg[9+MAXNAME+2];
     int p;
-    CHECK(p, readn(client_fd, cl_msg, strlen(cl_msg)+1), "readn");
+    //CHECK(p, readn(client_fd, cl_msg, strlen(cl_msg)+1), "readn");
+    CHECK(p, fdopen(client_fd, "r"), "fdopen");
+    CHECK(p, fgets(cl_msg, strlen(cl_msg), (FILE*) p), "fgets"); 
     
     /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
     char *cont;
-    char *keyword=strtok_r(keyword, " ", &cont);
+    char *keyword=strtok_r(cl_msg, " ", &cont);
     if(strcmp(keyword,"REGISTER")==0)
         Wregister(cont, client_fd);
     else if(strcmp(keyword,"STORE")==0)
@@ -105,9 +107,20 @@ void Wstore(char *cont, int client_fd){
     char *buffer=(char*) calloc(len+1, sizeof(char));
     int f_fd;
     /*Apro il file in lettura/scrittura con l'opzione che deve essere creato se non esistente*/
-    CHECK(f_fd, open(filename, O_CREAT|O_RDWR, 0777), "open");
+    CHECK(f_fd, open(filename, O_CREAT|O_RDWR|O_APPEND, 0777), "open");
 
+    CHECK(err, readn(client_fd, buffer, len+1), "readn");
+    CHECK(err, write(f_fd, buffer, strlen(buffer)), "write");
 
+    if(err!=1)
+        n_obj++;
+    ready=1;
+    pthread_cond_signal(&mod);
+    pthread_mutex_unlock(&mtx);
+
+    if(err==-1)
+        return False;
+    return True   
 }
 
 void Wretrieve(char *cont, int client_fd){
