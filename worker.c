@@ -8,9 +8,7 @@ void *Worker(int client_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
     char cl_msg[9+MAXNAME+2];
     int p;
-    //CHECK(p, readn(client_fd, cl_msg, strlen(cl_msg)+1), "readn");
-    CHECK(p, fdopen(client_fd, "r"), "fdopen");
-    CHECK(p, fgets(cl_msg, strlen(cl_msg), (FILE*) p), "fgets"); 
+    CHECK(p, read(client_fd, cl_msg, strlen(cl_msg)+1), "read");
     
     /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
     char *cont;
@@ -28,15 +26,13 @@ void *Worker(int client_fd){
     else{
         char *answer_msg;
         strcpy(answer_msg, "KO keyword errata");
-        CHECK(p, writen(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "writen");
+        CHECK(p, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
     }
 }
 
 void Wregister(char *cont, int client_fd){
     char *cl_name=strtok_r(cont,"\n", &cont);
     char *userpath;
-    /*Apro la cartella data, non importa la mutua esclusione in quanto possono lavorarci più worker contemporaneamente*/
-    DIR *data=opendir("./data");
     struct dirent* file;
     worker_t *curr=worker_l;
 
@@ -64,20 +60,20 @@ void Wregister(char *cont, int client_fd){
         CHECK(p, sprintf(userpath, "%s/%s", "data", cl_name), "sprintf");
         mkdir(userpath, 0777);
         /*Invio il messaggio di riuscita connessione*/
-        CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
+        CHECK(p, write(client_fd, "OK \n", 3*sizeof(char)), "write");
         conn_client++;
     } else if(curr->connected==0){
         curr->connected=1;
         curr->workerfd=client_fd;
 
         /*Invio il messaggio di riuscita connessione, cliente già connesso precedentemente*/
-        CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
+        CHECK(p, write(client_fd, "OK \n", 3*sizeof(char)), "write");
         conn_client++;
     } else if(curr->connected==1){
         /*Invio messaggio di fallimento di connessione*/
         char *response;
-        int err=sprintf(response, "%s", "KO, client già connesso con questo nome\n");
-        CHECK(p, writen(client_fd, response, strlen(response)), "writen");
+        int err=sprintf(response, "%s", "KO, client già connesso con questo nome \n");
+        CHECK(p, write(client_fd, response, strlen(response)), "write");
     }
 
     ready=1;
@@ -108,19 +104,26 @@ void Wstore(char *cont, int client_fd){
     int f_fd;
     /*Apro il file in lettura/scrittura con l'opzione che deve essere creato se non esistente*/
     CHECK(f_fd, open(filename, O_CREAT|O_RDWR, 0777), "open");
+    /*Elimino dal messaggio " \n "*/
+    end=strtok_r(cont, " ", &cont);
+    CHECK(err, sprintf(buffer, "%s", cont[1]), "sprintf");
 
-    CHECK(err, readn(client_fd, buffer, len+1), "readn");
+    /*Leggo sul canale socket la restante parte del messaggio che non ho letto con fgets poi lo scrivo nel file effettivo*/
+    CHECK(err, read(client_fd, buffer, len+1-strlen(buffer)), "read");
     CHECK(err, write(f_fd, buffer, strlen(buffer)), "write");
 
-    if(err!=1)
+    if(err!=-1){
         n_obj++;
+        CHECK(err, write(client_fd, "OK \n", 4), "write");
+    } else {
+        char *response;
+        CHECK(err, sprintf(response, "%s", "KO, salvataggio file non riuscito"), "sprintf");
+        CHECK(err, write(client_fd, response, strlen(response)), "write");
+    }
+
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
-
-    if(err==-1)
-        return False;
-    return True;
 }
 
 void Wretrieve(char *cont, int client_fd){
@@ -149,7 +152,7 @@ void Wleave(int client_fd){
     pthread_mutex_unlock(&mtx);
 
     int p;
-    CHECK(p, writen(client_fd, "OK\n", 3*sizeof(char)), "writen");
+    CHECK(p, write(client_fd, "OK \n", 4), "write");
     CHECKSOCK(p, close(client_fd), "close");
 }
 
