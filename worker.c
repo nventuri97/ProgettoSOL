@@ -82,7 +82,13 @@ void Wregister(char *cont, int client_fd){
 }
 
 void Wstore(char *cont, int client_fd){
-
+    char *filename;
+    worker_t *curr;
+    while(curr->workerfd!=client_fd)
+        curr=curr->nxt;
+    int err;
+    CHECK(err, sprintf(filename, "%s/%s/%s", "data", curr->_name, strtok_r(cont, " ", &cont)), "sprintf");
+    
 }
 
 void Wretrieve(char *cont, int client_fd){

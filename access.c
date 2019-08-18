@@ -6,7 +6,7 @@
 
 /*Dichiaro come variabile globale il file descriptor in quanto dovrà essere usato in più funzioni,
 non solamente nella os_connect */
-static int sockfd;
+static int sockfd=-1;
 
 int os_connect(char *name){
     struct sockaddr_un serveraddr;
@@ -46,6 +46,10 @@ int os_connect(char *name){
 }
 
 int os_store(char *name, void *block, size_t len){
+    if(sockfd==-1){
+        fprintf(stderr, "Socket non ancora aperta");
+        return False;
+    }
     /*Devo decidere se mettere i controlli sul nome e su block*/
 
     /*Messaggio dove inserirò STORE name len \n block*/
@@ -70,6 +74,10 @@ int os_store(char *name, void *block, size_t len){
 }
 
 void *os_retrieve(char *name){
+    if(sockfd==-1){
+        fprintf(stderr, "Socket non ancora aperta");
+        return False;
+    }
     /*Devo decidere se mettere i controlli sul nome del file*/
 
     /*Messaggio dove inserisco retrieve e nome del file da recuperare*/
@@ -107,6 +115,10 @@ void *os_retrieve(char *name){
 }
 
 int os_delete(char *name){
+    if(sockfd==-1){
+        fprintf(stderr, "Socket non ancora aperta");
+        return False;
+    }
     /*Devo decidere se mettere i controlli sul nome del file*/
 
     /*Messaggio dove inserisco delete e nome del file da recuperare*/
@@ -127,6 +139,11 @@ int os_delete(char *name){
 }
 
 int os_disconnect(){
+    if(sockfd==-1){
+        fprintf(stderr, "Socket non ancora aperta");
+        return False;
+    }
+    
     int err;
     CHECK(err, writen(sockfd, "LEAVE", 6*sizeof(char)), "writen");
     if(err==-1)
