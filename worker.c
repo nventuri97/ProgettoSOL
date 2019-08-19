@@ -131,7 +131,32 @@ void Wretrieve(char *cont, int client_fd){
 }
 
 void Wdelete(char *cont, int client_fd){
+    char *filename;
+    worker_t *curr;
 
+    /*Lavoro in mutua esclusione*/
+    pthread_mutex_lock(&mtx);
+    while(!ready)
+        pthread_cond_wait(&mod,&mtx);
+    
+    ready=0;
+    while(curr->workerfd!=client_fd)
+        curr=curr->nxt;
+
+    char *path;
+    filename=strtok_r(cont, " ", cont);
+    int err;
+    CHECK(err, sprintf(path, "%s/%s/%s", "data", curr->_name, filename), "sprintd");
+    
+    CHECK(err, unlink(path), "unlink");
+
+    char *response;
+    if(err==0){
+        CHECK(err, sprinf(response, "%s", "OK \n"), "sprintf");
+        CHECK(err, write(client_fd, response, strlen(response)), "write");
+        n_obj--;
+        tot_size-=
+    }
 }
 
 void Wleave(int client_fd){
