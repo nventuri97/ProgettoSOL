@@ -22,9 +22,9 @@ libaccess.a: access.o access.h
 worker.o: worker.c util.h
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIBS)
 
-client.o: client.c util.h
+access.o: access.c util.h
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(LIBS)
-	
+
 clean:
 		@echo "Pulizia"
 		-rm -f *.o
