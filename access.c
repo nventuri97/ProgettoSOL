@@ -22,11 +22,11 @@ int os_connect(char *name){
         return False;
     else{
         /*Se la connect è andata a buon fine allora */
-        char *msg;
+        char msg[MAXBUFSIZE];
         CHECK(err, sprintf(msg, "REGISTER %s \n", name), "sprintf");
 
         /*Richiesta di iscrizione*/
-        CHECK(err, write(sockfd,(char *) msg, strlen(msg)), "write");
+        CHECK(err, write(sockfd, msg, strlen(msg)), "write");
         if(err==-1)
             return False;
 
@@ -34,7 +34,7 @@ int os_connect(char *name){
         char answer[MAXBUFSIZE];
         /*aspetto con il primo messaggio la lunghezza effettiva della risposta*/
         
-        CHECK(err, read(sockfd, (char *) answer, MAXBUFSIZE), "read");
+        CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
         if(strncmp(answer,"OK", 2)==0)
             return True;
         else{
@@ -81,7 +81,7 @@ void *os_retrieve(char *name){
 
     /*Messaggio dove inserisco retrieve e nome del file da recuperare*/
     int err;
-    char *msg;
+    char msg[MAXBUFSIZE];
     CHECK(err, sprintf(msg, "RETRIVE %s \n", name), "sprintf");
     /*Invio il messaggio al server*/int err;
     CHECK(err, write(sockfd, msg, strlen(msg)), "write");
@@ -119,9 +119,10 @@ int os_delete(char *name){
     /*Devo decidere se mettere i controlli sul nome del file*/
 
     /*Messaggio dove inserisco delete e nome del file da recuperare*/
-    char msg[7+strlen(name)];
+    char msg[MAXBUFSIZE];
     int err;
     CHECK(err, sprintf(msg, "%s %s \n", "DELETE", name), "sprintf");
+    CHECK(err, write(sockfd, msg, strlen(msg)), "write");
 
     /*Messaggio di risposta dal server*/
     char answer[MAXBUFSIZE];
