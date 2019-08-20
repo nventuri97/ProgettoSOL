@@ -1,7 +1,6 @@
 #include<sys/wait.h>
 #include<sys/uio.h>
 #include<sys/socket.h>
-#include<sys/stat.h> 
 #include<fcntl.h>
 
 #include<worker.h>
@@ -208,7 +207,7 @@ void Wleave(int client_fd){
     CHECKSOCK(p, close(client_fd), "close");
 }
 
-void Worker(int client_fd){
+void *Worker(int client_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
     char cl_msg[9+MAXNAME+2];
     int p;
