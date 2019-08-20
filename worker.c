@@ -34,7 +34,7 @@ void Worker(int client_fd){
 
 void Wregister(char *cont, int client_fd){
     char *cl_name=strtok_r(cont,"\n", &cont);
-    char *userpath;
+    char userpath[UNIX_PATH_MAX];
     struct dirent* file;
     worker_t *curr=worker_l;
 
@@ -74,7 +74,7 @@ void Wregister(char *cont, int client_fd){
         conn_client++;
     } else if(curr->connected==1){
         /*Invio messaggio di fallimento di connessione*/
-        char *response;
+        char response[MAXBUFSIZE];
         int err=sprintf(response, "%s", "KO, client già connesso con questo nome \n");
         CHECK(p, write(client_fd, response, strlen(response)), "write");
     }
@@ -85,7 +85,7 @@ void Wregister(char *cont, int client_fd){
 }
 
 void Wstore(char *cont, int client_fd){
-    char *filename;
+    char filepath[UNIX_PATH_MAX];
     worker_t *curr=worker_l;
 
     /*Lavoro in mutua esclusione*/
@@ -98,7 +98,7 @@ void Wstore(char *cont, int client_fd){
         curr=curr->nxt;
     int err;
     /*Creo il nome del file inserendolo direttamente nella cartella del client*/
-    CHECK(err, sprintf(filename, "%s/%s/%s", "data", curr->_name, strtok_r(cont, " ", &cont)), "sprintf");
+    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, strtok_r(cont, " ", &cont)), "sprintf");
     char *end; 
     long int len=strtol(strtok_r(cont, " ", &cont), &end, 10);
     tot_size+=len;
@@ -119,7 +119,7 @@ void Wstore(char *cont, int client_fd){
         n_obj++;
         CHECK(err, write(client_fd, "OK \n", 4), "write");
     } else {
-        char *response;
+        char response[MAXBUFSIZE];
         CHECK(err, sprintf(response, "%s", "KO, salvataggio file non riuscito"), "sprintf");
         CHECK(err, write(client_fd, response, strlen(response)), "write");
     }
@@ -130,7 +130,7 @@ void Wstore(char *cont, int client_fd){
 }
 
 void Wretrieve(char *cont, int client_fd){
-    char *filename, *path;
+    char *filename, filepath[UNIX_PATH_MAX];
     worker_t *curr;
     int err;
 
@@ -144,21 +144,21 @@ void Wretrieve(char *cont, int client_fd){
     while(curr->workerfd!=client_fd)
         curr=curr->nxt;
     
-    CHECK(err, sprintf(path, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
+    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
     struct stat info;
 
     /*Devo controllare che il file effettivamente ci sia*/
     int f_fd;
-    CHECK(f_fd, open(path, O_RDONLY), "open");
+    CHECK(f_fd, open(filepath, O_RDONLY), "open");
 
-    char *response;
+    char response[MAXBUFSIZE];
     if(f_fd<0){
         CHECK(err, sprintf(response, "%s", "KO il file che hai cercato non esiste \n"), "sprintf");
         CHECK(err, write(client_fd, response, strlen(response)), "write");
         return;
     }
     /*Il file esiste e quindi devo andare a leggerlo*/
-    CHECK(err, stat(path, &info), "stat");
+    CHECK(err, stat(filepath, &info), "stat");
     off_t len=info.st_size;
 
     char buffer[len+1];
@@ -186,17 +186,17 @@ void Wdelete(char *cont, int client_fd){
     while(curr->workerfd!=client_fd)
         curr=curr->nxt;
 
-    char *path;
+    char filepath[UNIX_PATH_MAX];
     filename=strtok_r(cont, " ", cont);
     int err;
-    CHECK(err, sprintf(path, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
+    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
     /*Devo prendere la lunghezza per poi toglierla dalla dimensione totale dell'objectstore*/
     struct stat info;
-    CHECK(err, stat(path, &info), "stat");
+    CHECK(err, stat(filepath, &info), "stat");
     off_t len=info.st_size;
-    CHECK(err, unlink(path), "unlink");
+    CHECK(err, unlink(filepath), "unlink");
 
-    char *response;
+    char response[MAXBUFSIZE];
     if(err==0){
         CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
         CHECK(err, write(client_fd, response, strlen(response)), "write");

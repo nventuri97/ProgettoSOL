@@ -16,6 +16,7 @@
 #define False 0
 #define MAXNAME 100
 #define MAXBUFSIZE 180
+#define UNIX_PATH_MAX 108
 
 #define CHECKSOCK(x,f,m) \
     if((x=f)==-1){   \
