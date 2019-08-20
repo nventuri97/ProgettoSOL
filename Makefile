@@ -7,7 +7,7 @@ LIBS = -lpthread
 
 all : objectstore client
 
-objectstore: objectstore.c worker.o
+objectstore: objectstore.c worker.c util.h
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
 
 
@@ -16,9 +16,6 @@ client: client.c libaccess.a
 
 libaccess.a: access.o access.h
 	ar rvs $@ $<
-
-worker.o: worker.c util.h
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
 
 access.o: access.c util.h
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
