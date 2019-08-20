@@ -23,6 +23,6 @@ typedef struct worker{
 
 worker_t *worker_l;
 
-void *Worker(int client_fd);
+void Worker(int client_fd);
 
 #endif
