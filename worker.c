@@ -5,7 +5,7 @@
 #include<worker.h>
 #include<sys/stat.h> 
 
-void *Worker(int client_fd){
+void Worker(int client_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
     char cl_msg[9+MAXNAME+2];
     int p;
@@ -196,12 +196,12 @@ void Wdelete(char *cont, int client_fd){
 
     char *response;
     if(err==0){
-        CHECK(err, sprinf(response, "%s", "OK \n"), "sprintf");
+        CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
         CHECK(err, write(client_fd, response, strlen(response)), "write");
         n_obj--;
         tot_size-=(int) len;
     } else {
-        CHECK(err, sprinf(response, "%s", "KO, rimozione file fallita \n"), "sprintf");
+        CHECK(err, sprintf(response, "%s", "KO, rimozione file fallita \n"), "sprintf");
         CHECK(err, write(client_fd, response, strlen(response)), "write");
     }
 
