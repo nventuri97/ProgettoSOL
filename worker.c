@@ -6,32 +6,6 @@
 
 #include<worker.h>
 
-void Worker(int client_fd){
-    /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
-    char cl_msg[9+MAXNAME+2];
-    int p;
-    CHECK(p, read(client_fd, cl_msg, strlen(cl_msg)+1), "read");
-    
-    /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
-    char *cont;
-    char *keyword=strtok_r(cl_msg, " ", &cont);
-    if(strcmp(keyword,"REGISTER")==0)
-        Wregister(cont, client_fd);
-    else if(strcmp(keyword,"STORE")==0)
-        Wstore(cont, client_fd);                    //ancora da definire
-    else if(strcmp(keyword,"RETRIEVE")==0)
-        Wretrieve(cont, client_fd);                 //ancora da definire
-    else if(strcmp(keyword,"DELETE")==0)
-        Wdelete(cont, client_fd);                   //ancora da definire
-    else if(strcmp(keyword,"LEAVE")==0)
-        Wleave(client_fd);                        //ancora da definire
-    else{
-        char *answer_msg;
-        strcpy(answer_msg, "KO keyword errata");
-        CHECK(p, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
-    }
-}
-
 void Wregister(char *cont, int client_fd){
     char *cl_name=strtok_r(cont,"\n", &cont);
     char userpath[UNIX_PATH_MAX];
@@ -106,7 +80,7 @@ void Wstore(char *cont, int client_fd){
     char *buffer=(char*) calloc(len+1, sizeof(char));
     int f_fd;
     /*Apro il file in lettura/scrittura con l'opzione che deve essere creato se non esistente*/
-    CHECK(f_fd, open(filename, O_CREAT|O_RDWR, 0777), "open");
+    CHECK(f_fd, open(filepath, O_CREAT|O_RDWR, 0777), "open");
     /*Elimino dal messaggio " \n "*/
     end=strtok_r(cont, " ", &cont);
     CHECK(err, sprintf(buffer, "%s", cont[1]), "sprintf");
@@ -233,6 +207,33 @@ void Wleave(int client_fd){
     CHECK(p, write(client_fd, "OK \n", 4), "write");
     CHECKSOCK(p, close(client_fd), "close");
 }
+
+void Worker(int client_fd){
+    /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
+    char cl_msg[9+MAXNAME+2];
+    int p;
+    CHECK(p, read(client_fd, cl_msg, strlen(cl_msg)+1), "read");
+    
+    /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
+    char *cont;
+    char *keyword=strtok_r(cl_msg, " ", &cont);
+    if(strcmp(keyword,"REGISTER")==0)
+        Wregister(cont, client_fd);
+    else if(strcmp(keyword,"STORE")==0)
+        Wstore(cont, client_fd);                    
+    else if(strcmp(keyword,"RETRIEVE")==0)
+        Wretrieve(cont, client_fd);                 
+    else if(strcmp(keyword,"DELETE")==0)
+        Wdelete(cont, client_fd);                 
+    else if(strcmp(keyword,"LEAVE")==0)
+        Wleave(client_fd);
+    else{
+        char *answer_msg;
+        strcpy(answer_msg, "KO keyword errata");
+        CHECK(p, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
+    }
+}
+
 
 int main(){
     return 0;
