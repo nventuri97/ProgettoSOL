@@ -107,7 +107,7 @@ void *os_retrieve(char *name){
         }
         return file;
     } else
-        fprintf(stderr, "Lettura: KO %s\n", cont);
+        fprintf(stderr, "Lettura: %s\n", cont);
     return file;
 }
 

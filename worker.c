@@ -1,8 +1,9 @@
-#include <sys/wait.h>
-#include <sys/uio.h>
-#include <sys/socket.h>
-#include <fcntl.h>
-#include <worker.h>
+#include<sys/wait.h>
+#include<sys/uio.h>
+#include<sys/socket.h>
+#include<fcntl.h>
+#include<worker.h>
+#include<sys/stat.h> 
 
 void *Worker(int client_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
@@ -127,7 +128,47 @@ void Wstore(char *cont, int client_fd){
 }
 
 void Wretrieve(char *cont, int client_fd){
+    char *filename, *path;
+    worker_t *curr;
+    int err;
 
+    /*Lavoro in mutua esclusione*/
+    pthread_mutex_lock(&mtx);
+    while(!ready)
+        pthread_cond_wait(&mod, &mtx);
+    
+    /*Ricreo il path del file*/
+    filename=strtok_r(cont, " ", &cont);
+    while(curr->workerfd!=client_fd)
+        curr=curr->nxt;
+    
+    CHECK(err, sprintf(path, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
+    struct stat info;
+
+    /*Devo controllare che il file effettivamente ci sia*/
+    int f_fd;
+    CHECK(f_fd, open(path, O_RDONLY), "open");
+
+    char *response;
+    if(f_fd<0){
+        CHECK(err, sprintf(response, "%s", "KO il file che hai cercato non esiste \n"), "sprintf");
+        CHECK(err, write(client_fd, response, strlen(response)), "write");
+        return;
+    }
+    /*Il file esiste e quindi devo andare a leggerlo*/
+    CHECK(err, stat(path, &info), "stat");
+    off_t len=info.st_size;
+
+    char buffer[len+1];
+    /*Leggo il file e lo salvo nel buffer*/
+    CHECK(err, read(f_fd, buffer, len+1), "read");
+    CHECK(err, sprintf(response, "%s %s \n %s", "OK", len, buffer), "sprintf");
+
+    CHECK(err, write(client_fd, response, strlen(response)), "write");
+
+    ready=1;
+    pthread_cond_signal(&mod);
+    pthread_mutex_unlock(&mtx);
 }
 
 void Wdelete(char *cont, int client_fd){
@@ -146,8 +187,11 @@ void Wdelete(char *cont, int client_fd){
     char *path;
     filename=strtok_r(cont, " ", cont);
     int err;
-    CHECK(err, sprintf(path, "%s/%s/%s", "data", curr->_name, filename), "sprintd");
-    
+    CHECK(err, sprintf(path, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
+    /*Devo prendere la lunghezza per poi toglierla dalla dimensione totale dell'objectstore*/
+    struct stat info;
+    CHECK(err, stat(path, &info), "stat");
+    off_t len=info.st_size;
     CHECK(err, unlink(path), "unlink");
 
     char *response;
@@ -155,8 +199,15 @@ void Wdelete(char *cont, int client_fd){
         CHECK(err, sprinf(response, "%s", "OK \n"), "sprintf");
         CHECK(err, write(client_fd, response, strlen(response)), "write");
         n_obj--;
-        tot_size-=
+        tot_size-=(int) len;
+    } else {
+        CHECK(err, sprinf(response, "%s", "KO, rimozione file fallita \n"), "sprintf");
+        CHECK(err, write(client_fd, response, strlen(response)), "write");
     }
+
+    ready=1;
+    pthread_cond_signal(&mod);
+    pthread_mutex_unlock(&mtx);
 }
 
 void Wleave(int client_fd){
