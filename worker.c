@@ -1,9 +1,10 @@
 #include<sys/wait.h>
 #include<sys/uio.h>
 #include<sys/socket.h>
-#include<fcntl.h>
-#include<worker.h>
 #include<sys/stat.h> 
+#include<fcntl.h>
+
+#include<worker.h>
 
 void Worker(int client_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
@@ -38,6 +39,7 @@ void Wregister(char *cont, int client_fd){
     worker_t *curr=worker_l;
 
     int p;
+    /*Lavoro in mutua esclusione*/
     pthread_mutex_lock(&mtx);
     while(!ready)
         pthread_cond_wait(&mod,&mtx);
@@ -173,7 +175,7 @@ void Wretrieve(char *cont, int client_fd){
 
 void Wdelete(char *cont, int client_fd){
     char *filename;
-    worker_t *curr;
+    worker_t *curr=worker_l;
 
     /*Lavoro in mutua esclusione*/
     pthread_mutex_lock(&mtx);

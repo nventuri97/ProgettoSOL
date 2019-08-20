@@ -1,8 +1,4 @@
 #define _POSIX_C_SOURCE 200112L
-#include<assert.h>
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
 #include<sys/wait.h>
 #include<sys/uio.h>
 #include<sys/socket.h>
