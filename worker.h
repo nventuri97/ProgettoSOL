@@ -1,7 +1,7 @@
 #ifndef WORKER_H
 #define WORKER_H
 
-#define _POSIX_C_SOURCE 200112L
+#define _POSIX_C_SOURCE 200809L
 #include"util.h"
 #include<dirent.h>
 

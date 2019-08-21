@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 200112L
+#define _POSIX_C_SOURCE 200809L
 #include<sys/wait.h>
 #include<sys/uio.h>
 #include<sys/socket.h>
@@ -45,10 +45,10 @@ int main(int argc, char *argv[]){
     /*dichiaro il worker */
     pthread_t os_worker;
 
-    int clientfd;
+    long int clientfd;
     while(True){
         CHECKSOCK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
-        CHECK(p, pthread_create(&os_worker, NULL, worker_, (void *) clientfd), "pthread create");   
+        CHECK(p, pthread_create(&os_worker, NULL,(void*) &worker_, (void*) &clientfd),"pthread_create");
     }
     
     return 0;
