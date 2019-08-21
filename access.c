@@ -3,7 +3,7 @@
 #include<fcntl.h>
 #include<sys/uio.h>
 
-#include<access.h>
+#include"access.h"
 
 /*Dichiaro come variabile globale il file descriptor in quanto dovrà essere usato in più funzioni,
 non solamente nella os_connect */
@@ -157,8 +157,4 @@ int os_disconnect(){
     if(err==-1)
         return False;
     return True;
-}
-
-int main(){
-    return 0;
 }

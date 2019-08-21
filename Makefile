@@ -7,18 +7,18 @@ LIBS = -lpthread
 
 all : objectstore client
 
-objectstore: objectstore.c worker.c util.h
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
+objectstore: objectstore.c worker.c worker.h util.h
+	$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@.o $(LIBS)
 
 
 client: client.c libaccess.a
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@.o  $(LIBS)
 
 libaccess.a: access.o access.h
 	ar rvs $@ $<
 
 access.o: access.c util.h
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@.o $(LIBS)
 
 clean:
 		@echo "Pulizia"

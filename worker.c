@@ -3,7 +3,7 @@
 #include<sys/socket.h>
 #include<fcntl.h>
 
-#include<worker.h>
+#include"worker.h"
 
 void w_register(char *cont, int client_fd){
     char *cl_name=strtok_r(cont,"\n", &cont);
@@ -230,9 +230,4 @@ void *_worker(int client_fd){
         CHECK(p, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
         CHECK(p, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
     }
-}
-
-
-int main(){
-    return 0;
 }
