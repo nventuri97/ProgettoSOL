@@ -158,7 +158,3 @@ int os_disconnect(){
         return False;
     return True;
 }
-
-int main(){
-    return 0;
-}

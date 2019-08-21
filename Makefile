@@ -1,7 +1,8 @@
 CC = gcc
 CFLAGS = -std=c99 -pedantic -Wall -O3 -Wmissing-field-initializers -D_POSIX_C_SOURCE=200809L -fsanitize=address -g -fno-omit-frame-pointer
 INCLUDES = -I .
-LIBS = -lpthread
+LIBS = -lpthread -L.
+
 
 .PHONY : clean cleanall
 
@@ -14,10 +15,10 @@ objectstore: objectstore.c worker.c worker.h util.h
 client: client.c libaccess.a
 	$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@.o  $(LIBS)
 
-libaccess.a: access.o access.h
-	ar rvs $@ $<
+libaccess.a: access.h access.o
+	ar rvs $@ $^
 
-access.o: access.c util.h
+access: access.c util.h
 	$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@.o $(LIBS)
 
 clean:
