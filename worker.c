@@ -209,7 +209,7 @@ void w_leave(int client_fd){
 
 void *worker_(int client_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
-    char cl_msg[9+MAXNAME+2];
+    char cl_msg[MAXBUFSIZE];
     int p;
     CHECK(p, read(client_fd, cl_msg, strlen(cl_msg)+1), "read");
     
