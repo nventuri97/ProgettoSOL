@@ -47,7 +47,8 @@ void w_register(char *cont, int client_fd){
     } else if(curr->connected==1){
         /*Invio messaggio di fallimento di connessione*/
         char response[MAXBUFSIZE];
-        int err=sprintf(response, "%s", "KO, client già connesso con questo nome \n");
+        int err;
+        CHECK(err, sprintf(response, "%s", "KO, client già connesso con questo nome \n"), "sprintf");
         CHECK(p, write(client_fd, response, strlen(response)), "write");
     }
 
@@ -136,7 +137,7 @@ void w_retrieve(char *cont, int client_fd){
     char buffer[len+1];
     /*Leggo il file e lo salvo nel buffer*/
     CHECK(err, read(f_fd, buffer, len+1), "read");
-    CHECK(err, sprintf(response, "%s %s \n %s", "OK", len, buffer), "sprintf");
+    CHECK(err, sprintf(response, "%s %ld \n %s", "OK", len, buffer), "sprintf");
 
     CHECK(err, write(client_fd, response, strlen(response)), "write");
 
@@ -159,7 +160,7 @@ void w_delete(char *cont, int client_fd){
         curr=curr->nxt;
 
     char filepath[UNIX_PATH_MAX];
-    filename=strtok_r(cont, " ", cont);
+    filename=strtok_r(cont, " ", &cont);
     int err;
     CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
     /*Devo prendere la lunghezza per poi toglierla dalla dimensione totale dell'objectstore*/
@@ -206,7 +207,7 @@ void w_leave(int client_fd){
     CHECKSOCK(p, close(client_fd), "close");
 }
 
-void *_worker(int client_fd){
+void *worker_(int client_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
     char cl_msg[9+MAXNAME+2];
     int p;

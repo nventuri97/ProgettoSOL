@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 200112L
+#define _POSIX_C_SOURCE 200809L
 #include<sys/wait.h>
 #include<fcntl.h>
 #include<sys/uio.h>
@@ -84,7 +84,7 @@ void *os_retrieve(char *name){
     int err;
     char msg[MAXBUFSIZE];
     CHECK(err, sprintf(msg, "RETRIVE %s \n", name), "sprintf");
-    /*Invio il messaggio al server*/int err;
+    /*Invio il messaggio al server*/
     CHECK(err, write(sockfd, msg, strlen(msg)), "write");
  
     /*Messaggio di risposta dal server*/
@@ -157,4 +157,8 @@ int os_disconnect(){
     if(err==-1)
         return False;
     return True;
+}
+
+int main(){
+    return 0;
 }
