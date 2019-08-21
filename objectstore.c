@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
     int clientfd;
     while(True){
         CHECKSOCK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
-        CHECK(p, pthread_create(&os_worker, NULL, worker_(clientfd), NULL), "pthread create");   
+        CHECK(p, pthread_create(&os_worker, NULL, worker_, (void *) clientfd), "pthread create");   
     }
     
     return 0;
