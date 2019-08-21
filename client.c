@@ -7,6 +7,8 @@
 #include"util.h"
 #include"access.h"
 
+#define TEST_STRING "Lo sai per un gol io darei la vita... la mia vita Che in fondo lo so sara' una partita... infinita.."
+
 static int success, failure, tot_test;
 
 void store_test();
@@ -94,4 +96,16 @@ int main(int argc, char *argv[]){
 void print_report(){
     fprintf(stdout, "REPORT FINALE:\n");
     fprintf(stdout, "1) Tentativi conclusi con successo: %d\n 2) Tentativi falliti: %d\n 3) Tentativi totali %d\n", success, failure, tot_test);
+}
+
+void store_test(){
+    return 0;
+}
+
+void retrieve_test(){
+    return 0;
+}
+
+void delete_test(){
+    return 0;
 }
