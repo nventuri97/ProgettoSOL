@@ -207,8 +207,9 @@ void w_leave(int client_fd){
     CHECKSOCK(p, close(client_fd), "close");
 }
 
-void *worker_(int client_fd){
+void *worker(void *cl_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
+    long int client_fd=(long) cl_fd;
     char cl_msg[MAXBUFSIZE];
     int p;
     CHECK(p, read(client_fd, cl_msg, strlen(cl_msg)+1), "read");
@@ -231,4 +232,5 @@ void *worker_(int client_fd){
         CHECK(p, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
         CHECK(p, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
     }
+    pthread_exit(NULL);
 }
