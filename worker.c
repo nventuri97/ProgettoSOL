@@ -8,7 +8,6 @@
 void w_register(char *cont, int client_fd){
     char *cl_name=strtok_r(cont,"\n", &cont);
     char userpath[UNIX_PATH_MAX];
-    struct dirent* file;
     worker_t *curr=worker_l;
 
     int p;
@@ -82,7 +81,7 @@ void w_store(char *cont, int client_fd){
     CHECK(f_fd, open(filepath, O_CREAT|O_RDWR, 0777), "open");
     /*Elimino dal messaggio " \n "*/
     end=strtok_r(cont, " ", &cont);
-    CHECK(err, sprintf(buffer, "%s", cont[1]), "sprintf");
+    CHECK(err, sprintf(buffer, "%s", cont), "sprintf");
 
     /*Leggo sul canale socket la restante parte del messaggio che non ho letto con fgets poi lo scrivo nel file effettivo*/
     CHECK(err, read(client_fd, buffer, len+1-strlen(buffer)), "read");
@@ -104,7 +103,7 @@ void w_store(char *cont, int client_fd){
 
 void w_retrieve(char *cont, int client_fd){
     char *filename, filepath[UNIX_PATH_MAX];
-    worker_t *curr;
+    worker_t *curr=worker_l;
     int err;
 
     /*Lavoro in mutua esclusione*/
@@ -227,8 +226,8 @@ void *_worker(int client_fd){
     else if(strcmp(keyword,"LEAVE")==0)
         w_leave(client_fd);
     else{
-        char *answer_msg;
-        strcpy(answer_msg, "KO keyword errata");
+        char answer_msg[MAXBUFSIZE];
+        CHECK(p, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
         CHECK(p, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
     }
 }
