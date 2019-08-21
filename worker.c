@@ -5,7 +5,7 @@
 
 #include<worker.h>
 
-void Wregister(char *cont, int client_fd){
+void w_register(char *cont, int client_fd){
     char *cl_name=strtok_r(cont,"\n", &cont);
     char userpath[UNIX_PATH_MAX];
     struct dirent* file;
@@ -57,7 +57,7 @@ void Wregister(char *cont, int client_fd){
     pthread_mutex_unlock(&mtx);
 }
 
-void Wstore(char *cont, int client_fd){
+void w_store(char *cont, int client_fd){
     char filepath[UNIX_PATH_MAX];
     worker_t *curr=worker_l;
 
@@ -102,7 +102,7 @@ void Wstore(char *cont, int client_fd){
     pthread_mutex_unlock(&mtx);
 }
 
-void Wretrieve(char *cont, int client_fd){
+void w_retrieve(char *cont, int client_fd){
     char *filename, filepath[UNIX_PATH_MAX];
     worker_t *curr;
     int err;
@@ -146,7 +146,7 @@ void Wretrieve(char *cont, int client_fd){
     pthread_mutex_unlock(&mtx);
 }
 
-void Wdelete(char *cont, int client_fd){
+void w_delete(char *cont, int client_fd){
     char *filename;
     worker_t *curr=worker_l;
 
@@ -185,7 +185,7 @@ void Wdelete(char *cont, int client_fd){
     pthread_mutex_unlock(&mtx);
 }
 
-void Wleave(int client_fd){
+void w_leave(int client_fd){
     /*Gestisco la mia lista in mutua esclusione*/
     worker_t *curr=worker_l;
     pthread_mutex_lock(&mtx);
@@ -207,7 +207,7 @@ void Wleave(int client_fd){
     CHECKSOCK(p, close(client_fd), "close");
 }
 
-void *Worker(int client_fd){
+void *_worker(int client_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
     char cl_msg[9+MAXNAME+2];
     int p;
@@ -217,15 +217,15 @@ void *Worker(int client_fd){
     char *cont;
     char *keyword=strtok_r(cl_msg, " ", &cont);
     if(strcmp(keyword,"REGISTER")==0)
-        Wregister(cont, client_fd);
+        w_register(cont, client_fd);
     else if(strcmp(keyword,"STORE")==0)
-        Wstore(cont, client_fd);                    
+        w_store(cont, client_fd);                    
     else if(strcmp(keyword,"RETRIEVE")==0)
-        Wretrieve(cont, client_fd);                 
+        w_retrieve(cont, client_fd);                 
     else if(strcmp(keyword,"DELETE")==0)
-        Wdelete(cont, client_fd);                 
+        w_delete(cont, client_fd);                 
     else if(strcmp(keyword,"LEAVE")==0)
-        Wleave(client_fd);
+        w_leave(client_fd);
     else{
         char *answer_msg;
         strcpy(answer_msg, "KO keyword errata");
