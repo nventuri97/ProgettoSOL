@@ -10,7 +10,7 @@
 #define test_string "Lo sai per un gol io darei la vita... la mia vita Che in fondo lo so sara' una partita... infinita.."
 
 static int success, failure, tot_test;
-char trainingData[20];
+char *trainingData[20];
 
 void training_data();
 void store_test();
@@ -105,7 +105,8 @@ void training_data(){
 
     /*Preparo il primo elemento per i test*/
     trainingData[0]=(char*) calloc(base_size+1, sizeof(char));
-    sprintf(trainingData[0], "%s\0", test_string);
+    sprintf(trainingData[0], "%s", test_string);
+    trainingData[0][base_size]='\0';
 
     int i;
     for(i=1;i<20;i++){
@@ -155,8 +156,7 @@ void retrieve_test(){
         sprintf(filename, "t-%d", i+1);
 
         /*Eseguo la retrive*/
-        char *data;
-        CHECK(data, os_retrieve(filename), "os_retrieve");
+        char *data=os_retrieve(filename);
         if(strcmp(data, trainingData[i])==0){
             fprintf(stdout, "Recupero dati riuscito\n");
             success++;
