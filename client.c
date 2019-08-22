@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
     }
 
     char *name;
-    name=calloc(nl, sizeof(char));
+    name=(char*) calloc(nl+1, sizeof(char));
     strcpy(name,argv[1]);
 
     int err, i=0;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
         i++;
     }
     char *end;
-    long int action=strtol(argv[3], &end, 10);
+    long int action=strtol(argv[2], &end, 10);
 
     success=0;
     failure=0;
