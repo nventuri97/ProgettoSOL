@@ -121,13 +121,69 @@ void training_data(){
 }
 
 void store_test(){
-    return 0;
+    /*preparo i dati da salvare sul server*/
+    training_data();
+
+    /*Avvio un ciclo che mi fa la store dei 20 dati che ho generato con training_data()*/
+    for(int i=0;i<20;i++){
+        char filename[MAXNAME];
+        sprintf(filename, "t-%d", i+1);
+        size_t i_size=strlen(trainingData[i]);
+
+        /*Adesso mando la store per memorizzare i dati*/
+        int err;
+        CHECK(err, os_store(filename, (void *) trainingData[i], i_size), "os_store");
+
+        if(err==True){
+            fprintf(stdout, "Dati salvati correttamente\n");
+            success++;
+        } else {
+            fprintf(stderr, "Dati non salvati, qualcosa è andato storto\n");
+            failure++;
+        }
+        tot_test++;
+    }
 }
 
 void retrieve_test(){
-    return 0;
+    /*preparo i dati per controllare l'autenticità di quelli restituiti*/
+    training_data();
+
+    /*Eseguo la retrive di tutti i dati inseriti dal client*/
+    for(int i=0;i<20;i++){
+        char filename[MAXNAME];
+        sprintf(filename, "t-%d", i+1);
+
+        /*Eseguo la retrive*/
+        char *data;
+        CHECK(data, os_retrieve(filename), "os_retrieve");
+        if(strcmp(data, trainingData[i])==0){
+            fprintf(stdout, "Recupero dati riuscito\n");
+            success++;
+        } else {
+            fprintf(stderr, "Recupero dati fallito\n");
+            failure++;
+        }
+        tot_test++;
+    }
 }
 
 void delete_test(){
-    return 0;
+    /*Inizializzo direttamente i nomi dei file e mando la delete*/
+    for(int i=0;i<20;i++){
+        char filename[MAXNAME];
+        int err;
+        CHECK(err, sprintf(filename, "t-%d", i+1),"sprintf");
+
+        /*Elimino i dati */
+        CHECK(err, os_delete(filename), "os_delete");
+        if(err==True){
+            fprintf(stdout, "Dati rimossi correttamente\n");
+            success++;
+        } else {
+            fprintf(stderr, "Dati non rimossi, qualcosa è andato storto\n");
+            failure++;
+        }
+        tot_test++;
+    }
 }
