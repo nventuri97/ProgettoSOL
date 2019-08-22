@@ -7,10 +7,12 @@
 #include"util.h"
 #include"access.h"
 
-#define TEST_STRING "Lo sai per un gol io darei la vita... la mia vita Che in fondo lo so sara' una partita... infinita.."
+#define test_string "Lo sai per un gol io darei la vita... la mia vita Che in fondo lo so sara' una partita... infinita.."
 
 static int success, failure, tot_test;
+char trainingData[20];
 
+void training_data();
 void store_test();
 void retrieve_test();
 void delete_test();
@@ -96,6 +98,26 @@ int main(int argc, char *argv[]){
 void print_report(){
     fprintf(stdout, "REPORT FINALE:\n");
     fprintf(stdout, "1) Tentativi conclusi con successo: %d\n 2) Tentativi falliti: %d\n 3) Tentativi totali %d\n", success, failure, tot_test);
+}
+
+void training_data(){
+    size_t base_size=strlen(test_string);
+
+    /*Preparo il primo elemento per i test*/
+    trainingData[0]=(char*) calloc(base_size+1, sizeof(char));
+    sprintf(trainingData[0], "%s\0", test_string);
+
+    int i;
+    for(i=1;i<20;i++){
+        /*costruisco la dimensione del blocco i incrementando e arrivano fino a circa 100k*/
+        size_t i_size=i*100*52.65;
+        trainingData[i]=(char*) calloc(i_size+1, sizeof(char));
+        /*inizializzo la riga del buffer con \0*/
+        memset(trainingData[i], '\0', i_size);
+
+        for(size_t j = 0; j < i_size/base_size; j++) 
+            sprintf(trainingData[i],"%s%s",trainingData[i],test_string);
+    }
 }
 
 void store_test(){
