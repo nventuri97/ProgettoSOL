@@ -25,6 +25,8 @@ void w_register(char *cont, int client_fd){
     /*Nessun client ancora registrato*/
     if(worker_l==NULL){
         worker_l=new_worker;
+        worker_l->nxt=NULL;
+        worker_l->prv=NULL;
         /*Creo la cartella del client in cui andrò a inserire i file*/
         CHECK(err, sprintf(userpath, "%s/%s", "data", cl_name), "sprintf");
         mkdir(userpath, 0777);
