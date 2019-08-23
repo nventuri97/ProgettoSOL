@@ -35,12 +35,9 @@ int main(int argc, char *argv[]){
     char name[nl];
     strcpy(name,argv[1]);
 
-    int err=False, i=0;
+    int err;
     /*Provo a connettermi al server per 5 volte, con 5 scelta arbitraria, in caso di mancata connessione riporto l'errore */
-    while(i<5 && err!=True){
-        err=os_connect(name);
-        i++;
-    }
+    CHECK(err, os_connect(name), "os_connect");
     char *end;
     long int action=strtol(argv[2], &end, 10);
 
@@ -72,7 +69,6 @@ int main(int argc, char *argv[]){
     } else {
         failure++;
         tot_test++;
-        fprintf(stderr, "Tentativi di connessione esauriti\n");
         perror("connect");
         print_report();
         return EXIT_FAILURE;

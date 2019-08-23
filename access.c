@@ -18,30 +18,32 @@ int os_connect(char *name){
     strncpy(serveraddr.sun_path, SOCKNAME, strlen(SOCKNAME)+1);
 
     /*uso la connect per connettermi al server */
-    int err=connect(sockfd, (struct sockaddr*) &serveraddr, sizeof(serveraddr));
+    while(connect(sockfd, (struct sockaddr*) &serveraddr, sizeof(serveraddr))==-1)
+        if(errno==ENOENT)
+            sleep(1);
+        else
+            return False;
+    
+    /*Se la connect è andata a buon fine allora */
+    int err;
+    char msg[MAXBUFSIZE];
+    CHECK(err, sprintf(msg, "%s %s \n","REGISTER", name), "sprintf");
+
+    /*Richiesta di iscrizione*/
+    CHECK(err, write(sockfd, msg, strlen(msg)), "write");
     if(err==-1)
         return False;
+
+    /*Messaggio di risposta*/
+    char answer[MAXBUFSIZE];
+    /*aspetto con il primo messaggio la lunghezza effettiva della risposta*/
+    
+    CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
+    if(strncmp(answer,"OK", 2)==0)
+        return True;
     else{
-        /*Se la connect è andata a buon fine allora */
-        char msg[MAXBUFSIZE];
-        CHECK(err, sprintf(msg, "REGISTER %s \n", name), "sprintf");
-
-        /*Richiesta di iscrizione*/
-        CHECK(err, write(sockfd, msg, strlen(msg)), "write");
-        if(err==-1)
-            return False;
-
-        /*Messaggio di risposta*/
-        char answer[MAXBUFSIZE];
-        /*aspetto con il primo messaggio la lunghezza effettiva della risposta*/
-        
-        CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
-        if(strncmp(answer,"OK", 2)==0)
-            return True;
-        else{
-            fprintf(stderr, "Connessione: %s\n", answer);
-            return False;
-        }
+        fprintf(stderr, "Connessione: %s\n", answer);
+        return False;
     }
 }
 

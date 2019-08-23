@@ -6,7 +6,7 @@
 #include"worker.h"
 
 void w_register(char *cont, int client_fd){
-    char *cl_name=strtok_r(cont,"\n", &cont);
+    char *cl_name=strtok_r(cont," ", &cont);
     char userpath[UNIX_PATH_MAX];
     worker_t *curr=worker_l;
 
@@ -212,7 +212,7 @@ void *worker(void *cl_fd){
     long int client_fd=(long) cl_fd;
     char cl_msg[MAXBUFSIZE];
     int p;
-    CHECK(p, read(client_fd, cl_msg, strlen(cl_msg)+1), "read");
+    CHECK(p, read(client_fd, cl_msg, MAXBUFSIZE), "read");
     
     /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
     char *cont;
