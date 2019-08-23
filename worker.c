@@ -9,55 +9,65 @@ void w_register(char *cont, int client_fd){
     char *cl_name=strtok_r(cont," ", &cont);
     char userpath[UNIX_PATH_MAX];
 
-    int p;
     /*Lavoro in mutua esclusione*/
     pthread_mutex_lock(&mtx);
     while(!ready)
         pthread_cond_wait(&mod,&mtx);
     ready=0;
 
+    int err;
     char response[MAXBUFSIZE];
-    memset(response, '0', MAXBUFSIZE);
-    
-    /*Nuovo cliente*/
-    if(worker_l==NULL){
-        /*devo aggiungere un thread worker alla lista*/
-        worker_t *new_worker=(worker_t *) malloc(sizeof(worker_t));
-        if(worker_l!=NULL)
-            new_worker->prv=worker_l;
-        new_worker->nxt=NULL;
-        new_worker->connected=1;
-        new_worker->workerfd=client_fd;
-        strcpy(new_worker->_name,cl_name);
-        worker_l=new_worker;
 
+    worker_t *new_worker=(worker_t*) malloc(sizeof(worker_t));
+    new_worker->connected=1;
+    new_worker->workerfd=client_fd;
+    CHECK(err, sprintf(new_worker->_name, "%s", cl_name), "sprintf");
+    /*Nessun client ancora registrato*/
+    if(worker_l==NULL){
+        worker_l=new_worker;
         /*Creo la cartella del client in cui andrò a inserire i file*/
-        CHECK(p, sprintf(userpath, "%s/%s", "data", cl_name), "sprintf");
+        CHECK(err, sprintf(userpath, "%s/%s", "data", cl_name), "sprintf");
         mkdir(userpath, 0777);
         /*Invio il messaggio di riuscita connessione*/
-        CHECK(p, sprintf(response, "%s", "OK \n"), "sprintf");
-        CHECK(p, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+        CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
+        CHECK(err, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+
         conn_client++;
-    } else {
+    }else{
         worker_t *curr=worker_l;
-        while(curr->_name!=cl_name && curr->nxt!=NULL)
-        curr=curr->nxt;
-
-        if(curr->connected==0){
-        curr->connected=1;
-        curr->workerfd=client_fd;
-
-        /*Invio il messaggio di riuscita connessione, cliente già connesso precedentemente*/
-        CHECK(p, sprintf(response, "%s", "OK \n"), "sprintf");
-        CHECK(p, write(client_fd, response, strlen(response)*sizeof(char)), "write");
-        conn_client++;
+        /*Cerco se l'utente si è già connesso in precedenza*/
+        while(curr->workerfd!=client_fd && curr->nxt!=NULL)
+            curr=curr->nxt;
+        /*Utente non ancora connesso*/
+        if(curr->nxt==NULL){
+            new_worker->nxt=worker_l;
+            worker_l->prv=new_worker;
+            worker_l=new_worker;
+            /*Creo la cartella del client in cui andrò a inserire i file*/
+            CHECK(err, sprintf(userpath, "%s/%s", "data", cl_name), "sprintf");
+            mkdir(userpath, 0777);
+            /*Invio il messaggio di riuscita connessione*/
+            CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
+            CHECK(err, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+            conn_client++;
+        } else if(curr->connected==0){
+            /*Client già connesso in precedenza ma ora offline*/
+            (curr->nxt)->prv=new_worker;
+            new_worker->nxt=curr->nxt;
+            (curr->prv)->nxt=new_worker;
+            new_worker->prv=curr->prv;
+            /*Invio il messaggio di riuscita connessione*/
+            CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
+            CHECK(err, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+            free(curr);
+            conn_client++;
         } else if(curr->connected==1){
-        /*Invio messaggio di fallimento di connessione*/
-        int err;
-        CHECK(err, sprintf(response, "%s", "KO, client già connesso con questo nome \n"), "sprintf");
-        CHECK(p, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+            /*Client online*/
+            free(new_worker);
+            CHECK(err, sprintf(response, "%s", "KO client già online \n"), "sprintf");
         }
     }
+    
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
