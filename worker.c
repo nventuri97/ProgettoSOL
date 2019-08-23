@@ -47,9 +47,10 @@ void w_register(char *cont, int client_fd){
     } else if(curr->connected==1){
         /*Invio messaggio di fallimento di connessione*/
         char response[MAXBUFSIZE];
+        memset(response, '0', MAXBUFSIZE);
         int err;
         CHECK(err, sprintf(response, "%s", "KO, client già connesso con questo nome \n"), "sprintf");
-        CHECK(p, write(client_fd, response, strlen(response)), "write");
+        CHECK(p, write(client_fd, response, strlen(response)*sizeof(char)), "write");
     }
 
     ready=1;

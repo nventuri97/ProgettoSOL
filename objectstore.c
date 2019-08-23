@@ -33,6 +33,7 @@ int main(int argc, char *argv[]){
     /*inizializzo le variabili condivise tutte a 0*/
     /*rendo ready occupata, in modo tale che se qualcuno volesse modificare si blocca sulla wait*/
     ready=0;
+    worker_l=NULL;
     conn_client=0;
     tot_size=0;
     n_obj=0;
