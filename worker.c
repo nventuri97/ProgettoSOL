@@ -8,7 +8,6 @@
 void w_register(char *cont, int client_fd){
     char *cl_name=strtok_r(cont," ", &cont);
     char userpath[UNIX_PATH_MAX];
-    worker_t *curr=worker_l;
 
     int p;
     /*Lavoro in mutua esclusione*/
@@ -21,7 +20,7 @@ void w_register(char *cont, int client_fd){
     memset(response, '0', MAXBUFSIZE);
     
     /*Nuovo cliente*/
-    if(curr==NULL){
+    if(worker_l==NULL){
         /*devo aggiungere un thread worker alla lista*/
         worker_t *new_worker=(worker_t *) malloc(sizeof(worker_t));
         if(worker_l!=NULL)
@@ -40,6 +39,7 @@ void w_register(char *cont, int client_fd){
         CHECK(p, write(client_fd, response, strlen(response)*sizeof(char)), "write");
         conn_client++;
     } else {
+        worker_t *curr=worker_l;
         while(curr->_name!=cl_name && curr->nxt!=NULL)
         curr=curr->nxt;
 
