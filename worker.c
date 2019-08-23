@@ -38,10 +38,10 @@ void w_register(char *cont, int client_fd){
     }else{
         worker_t *curr=worker_l;
         /*Cerco se l'utente si è già connesso in precedenza*/
-        while(curr->workerfd!=client_fd && curr->nxt!=NULL)
+        while(strcmp(curr->_name, cl_name)!=0 && curr->nxt!=NULL)
             curr=curr->nxt;
         /*Utente non ancora connesso*/
-        if(curr->nxt==NULL){
+        if(curr->nxt==NULL && strcmp(curr->_name, cl_name)!=0){
             new_worker->nxt=worker_l;
             worker_l->prv=new_worker;
             worker_l=new_worker;
