@@ -70,7 +70,7 @@ void w_register(char *cont, int client_fd){
         }
     }
     
-    printf("Register: %s\n", response);
+    printf("Register: %s", response);
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
@@ -88,12 +88,15 @@ void w_store(char *cont, int client_fd){
     worker_t *curr=worker_l;
     while(curr->workerfd!=client_fd)
         curr=curr->nxt;
+    ready=1;
+    pthread_cond_signal(&mod);
+    pthread_mutex_unlock(&mtx);
+
     int err;
     /*Creo il nome del file inserendolo direttamente nella cartella del client*/
     CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, strtok_r(cont, " ", &cont)), "sprintf");
     char *end; 
     long int len=strtol(strtok_r(cont, " ", &cont), &end, 10);
-    tot_size+=len;
 
     char *buffer=(char*) calloc(len+1, sizeof(char));
     int f_fd;
@@ -107,18 +110,24 @@ void w_store(char *cont, int client_fd){
     CHECK(err, read(client_fd, buffer, len+1-strlen(buffer)), "read");
     CHECK(err, write(f_fd, buffer, strlen(buffer)), "write");
 
+    pthread_mutex_lock(&mtx);
+    while(!ready)
+        pthread_cond_wait(&mod, &mtx);
+    ready=0;
+    char response[MAXBUFSIZE];
     if(err!=-1){
+        tot_size+=len;/* condition */
         n_obj++;
-        CHECK(err, write(client_fd, "OK \n", 4), "write");
+        CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
+        CHECK(err, write(client_fd, response, strlen(response)*sizeof(char)), "write");
     } else {
-        char response[MAXBUFSIZE];
         CHECK(err, sprintf(response, "%s", "KO, salvataggio file non riuscito"), "sprintf");
-        CHECK(err, write(client_fd, response, strlen(response)), "write");
+        CHECK(err, write(client_fd, response, strlen(response)*sizeof(char)), "write");
     }
-
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
+    printf("Store: %s", response);
 }
 
 void w_retrieve(char *cont, int client_fd){

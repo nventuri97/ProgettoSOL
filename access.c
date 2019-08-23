@@ -39,13 +39,13 @@ int os_connect(char *name){
     /*aspetto con il primo messaggio la lunghezza effettiva della risposta*/
     
     CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
+    printf("Connect: %s", answer);
     if(strncmp(answer,"OK", 2)==0)
         return True;
     else{
         fprintf(stderr, "Connessione: %s\n", answer);
         return False;
     }
-    printf("Connect: %s\n", answer);
 }
 
 int os_store(char *name, void *block, size_t len){
@@ -74,6 +74,7 @@ int os_store(char *name, void *block, size_t len){
         fprintf(stderr, "Salvataggio: %s\n", answer);
         return False;
     }
+    printf("%s", answer);
 }
 
 void *os_retrieve(char *name){
