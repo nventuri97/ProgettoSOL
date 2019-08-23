@@ -17,8 +17,9 @@ void w_register(char *cont, int client_fd){
         pthread_cond_wait(&mod,&mtx);
     ready=0;
 
-    while(curr->_name!=cl_name && curr->nxt!=NULL)
-        curr=curr->nxt;
+    char response[MAXBUFSIZE];
+    memset(response, '0', MAXBUFSIZE);
+    
     /*Nuovo cliente*/
     if(curr==NULL){
         /*devo aggiungere un thread worker alla lista*/
@@ -35,24 +36,28 @@ void w_register(char *cont, int client_fd){
         CHECK(p, sprintf(userpath, "%s/%s", "data", cl_name), "sprintf");
         mkdir(userpath, 0777);
         /*Invio il messaggio di riuscita connessione*/
-        CHECK(p, write(client_fd, "OK \n", 3*sizeof(char)), "write");
+        CHECK(p, sprintf(response, "%s", "OK \n"), "sprintf");
+        CHECK(p, write(client_fd, response, strlen(response)*sizeof(char)), "write");
         conn_client++;
-    } else if(curr->connected==0){
+    } else {
+        while(curr->_name!=cl_name && curr->nxt!=NULL)
+        curr=curr->nxt;
+
+        if(curr->connected==0){
         curr->connected=1;
         curr->workerfd=client_fd;
 
         /*Invio il messaggio di riuscita connessione, cliente già connesso precedentemente*/
-        CHECK(p, write(client_fd, "OK \n", 3*sizeof(char)), "write");
+        CHECK(p, sprintf(response, "%s", "OK \n"), "sprintf");
+        CHECK(p, write(client_fd, response, strlen(response)*sizeof(char)), "write");
         conn_client++;
-    } else if(curr->connected==1){
+        } else if(curr->connected==1){
         /*Invio messaggio di fallimento di connessione*/
-        char response[MAXBUFSIZE];
-        memset(response, '0', MAXBUFSIZE);
         int err;
         CHECK(err, sprintf(response, "%s", "KO, client già connesso con questo nome \n"), "sprintf");
         CHECK(p, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+        }
     }
-
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
