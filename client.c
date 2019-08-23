@@ -32,11 +32,10 @@ int main(int argc, char *argv[]){
         return EXIT_FAILURE;
     }
 
-    char *name;
-    name=(char*) calloc(nl+1, sizeof(char));
+    char name[nl];
     strcpy(name,argv[1]);
 
-    int err, i=0;
+    int err=False, i=0;
     /*Provo a connettermi al server per 5 volte, con 5 scelta arbitraria, in caso di mancata connessione riporto l'errore */
     while(i<5 && err!=True){
         err=os_connect(name);
@@ -90,7 +89,6 @@ int main(int argc, char *argv[]){
         tot_test++;
     }
     
-
     print_report();
     return 0;
 }
