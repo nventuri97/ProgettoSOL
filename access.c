@@ -45,6 +45,7 @@ int os_connect(char *name){
         fprintf(stderr, "Connessione: %s\n", answer);
         return False;
     }
+    printf("Connect: %s\n", answer);
 }
 
 int os_store(char *name, void *block, size_t len){

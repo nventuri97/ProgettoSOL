@@ -70,6 +70,7 @@ void w_register(char *cont, int client_fd){
         }
     }
     
+    printf("Register: %s\n", response);
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
@@ -77,7 +78,6 @@ void w_register(char *cont, int client_fd){
 
 void w_store(char *cont, int client_fd){
     char filepath[UNIX_PATH_MAX];
-    worker_t *curr=worker_l;
 
     /*Lavoro in mutua esclusione*/
     pthread_mutex_lock(&mtx);
@@ -85,6 +85,7 @@ void w_store(char *cont, int client_fd){
         pthread_cond_wait(&mod,&mtx);
 
     ready=0;
+    worker_t *curr=worker_l;
     while(curr->workerfd!=client_fd)
         curr=curr->nxt;
     int err;
