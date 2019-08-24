@@ -17,6 +17,7 @@ void w_register(char *cont, int client_fd){
 
     int err;
     char response[MAXBUFSIZE];
+    CHECK(err, memset(response, 0, MAXBUFSIZE), "memset");
 
     worker_t *new_worker=(worker_t*) malloc(sizeof(worker_t));
     new_worker->connected=1;
@@ -116,6 +117,7 @@ void w_store(char *cont, int client_fd){
         pthread_cond_wait(&mod, &mtx);
     ready=0;
     char response[MAXBUFSIZE];
+    CHECK(err, memset(response, 0, MAXBUFSIZE), "memset");
     if(err!=-1){
         tot_size+=len;/* condition */
         n_obj++;
@@ -128,6 +130,7 @@ void w_store(char *cont, int client_fd){
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
+    /*Rilascio la mutua esclusione in quanto non vado a toccare più variabili condivise*/
     printf("Store: %s", response);
 }
 
@@ -147,6 +150,11 @@ void w_retrieve(char *cont, int client_fd){
         curr=curr->nxt;
     
     CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
+
+    ready=1;
+    pthread_cond_signal(&mod);
+    pthread_mutex_unlock(&mtx);
+    /*Rilascio la mutua esclusione in quanto non vado a toccare più variabili condivise*/
     struct stat info;
 
     /*Devo controllare che il file effettivamente ci sia*/
@@ -154,6 +162,7 @@ void w_retrieve(char *cont, int client_fd){
     CHECK(f_fd, open(filepath, O_RDONLY), "open");
 
     char response[MAXBUFSIZE];
+    CHECK(err, memset(response, 0, MAXBUFSIZE), "memset");
     if(f_fd<0){
         CHECK(err, sprintf(response, "%s", "KO il file che hai cercato non esiste \n"), "sprintf");
         CHECK(err, write(client_fd, response, strlen(response)), "write");
@@ -169,10 +178,6 @@ void w_retrieve(char *cont, int client_fd){
     CHECK(err, sprintf(response, "%s %ld \n %s", "OK", len, buffer), "sprintf");
 
     CHECK(err, write(client_fd, response, strlen(response)), "write");
-
-    ready=1;
-    pthread_cond_signal(&mod);
-    pthread_mutex_unlock(&mtx);
 }
 
 void w_delete(char *cont, int client_fd){
@@ -192,6 +197,11 @@ void w_delete(char *cont, int client_fd){
     filename=strtok_r(cont, " ", &cont);
     int err;
     CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
+
+    ready=1;
+    pthread_cond_signal(&mod);
+    pthread_mutex_unlock(&mtx);
+    /*Rilascio la mutua esclusione in quanto non vado a toccare più variabili condivise*/
     /*Devo prendere la lunghezza per poi toglierla dalla dimensione totale dell'objectstore*/
     struct stat info;
     CHECK(err, stat(filepath, &info), "stat");
@@ -199,6 +209,8 @@ void w_delete(char *cont, int client_fd){
     CHECK(err, unlink(filepath), "unlink");
 
     char response[MAXBUFSIZE];
+    CHECK(err, memset(response, 0, MAXBUFSIZE), "memset");
+    pthread_mutex_lock(&mtx);
     if(err==0){
         CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
         CHECK(err, write(client_fd, response, strlen(response)), "write");
@@ -208,9 +220,6 @@ void w_delete(char *cont, int client_fd){
         CHECK(err, sprintf(response, "%s", "KO, rimozione file fallita \n"), "sprintf");
         CHECK(err, write(client_fd, response, strlen(response)), "write");
     }
-
-    ready=1;
-    pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
 }
 
@@ -231,9 +240,12 @@ void w_leave(int client_fd){
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
 
-    int p;
-    CHECK(p, write(client_fd, "OK \n", 4), "write");
-    CHECKSOCK(p, close(client_fd), "close");
+    int err;
+    char response[4];
+    CHECK(err, memset(response, 0, 4), "memset");
+    CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
+    CHECK(err, write(client_fd, "OK \n", 4), "write");
+    CHECKSOCK(err, close(client_fd), "close");
 }
 
 void *worker(void *cl_fd){
@@ -260,6 +272,7 @@ void *worker(void *cl_fd){
             w_delete(cont, client_fd);    
         else{
             char answer_msg[MAXBUFSIZE];
+            CHECK(err, memset(answer_msg, 0, MAXBUFSIZE), "memset");
             CHECK(err, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
             CHECK(err, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
         }
