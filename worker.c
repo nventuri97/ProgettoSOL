@@ -17,7 +17,7 @@ void w_register(char *cont, int client_fd){
 
     int err;
     char response[MAXBUFSIZE];
-    CHECK(err, memset(response, 0, MAXBUFSIZE), "memset");
+    memset(response, 0, MAXBUFSIZE);
 
     worker_t *new_worker=(worker_t*) malloc(sizeof(worker_t));
     new_worker->connected=1;
@@ -117,7 +117,7 @@ void w_store(char *cont, int client_fd){
         pthread_cond_wait(&mod, &mtx);
     ready=0;
     char response[MAXBUFSIZE];
-    CHECK(err, memset(response, 0, MAXBUFSIZE), "memset");
+    memset(response, 0, MAXBUFSIZE);
     if(err!=-1){
         tot_size+=len;/* condition */
         n_obj++;
@@ -162,7 +162,7 @@ void w_retrieve(char *cont, int client_fd){
     CHECK(f_fd, open(filepath, O_RDONLY), "open");
 
     char response[MAXBUFSIZE];
-    CHECK(err, memset(response, 0, MAXBUFSIZE), "memset");
+    memset(response, 0, MAXBUFSIZE);
     if(f_fd<0){
         CHECK(err, sprintf(response, "%s", "KO il file che hai cercato non esiste \n"), "sprintf");
         CHECK(err, write(client_fd, response, strlen(response)), "write");
@@ -209,7 +209,7 @@ void w_delete(char *cont, int client_fd){
     CHECK(err, unlink(filepath), "unlink");
 
     char response[MAXBUFSIZE];
-    CHECK(err, memset(response, 0, MAXBUFSIZE), "memset");
+    memset(response, 0, MAXBUFSIZE);
     pthread_mutex_lock(&mtx);
     if(err==0){
         CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
@@ -241,10 +241,10 @@ void w_leave(int client_fd){
     pthread_mutex_unlock(&mtx);
 
     int err;
-    char response[4];
-    CHECK(err, memset(response, 0, 4), "memset");
+    char response[5];
+    memset(response, 0, 5);
     CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
-    CHECK(err, write(client_fd, "OK \n", 4), "write");
+    CHECK(err, write(client_fd, response, 5), "write");
     CHECKSOCK(err, close(client_fd), "close");
 }
 
@@ -272,7 +272,7 @@ void *worker(void *cl_fd){
             w_delete(cont, client_fd);    
         else{
             char answer_msg[MAXBUFSIZE];
-            CHECK(err, memset(answer_msg, 0, MAXBUFSIZE), "memset");
+            memset(answer_msg, 0, MAXBUFSIZE);
             CHECK(err, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
             CHECK(err, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
         }

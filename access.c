@@ -27,15 +27,17 @@ int os_connect(char *name){
     /*Se la connect è andata a buon fine allora */
     int err;
     char msg[MAXBUFSIZE];
+    memset(msg, 0, MAXBUFSIZE);
     CHECK(err, sprintf(msg, "%s %s \n","REGISTER", name), "sprintf");
 
     /*Richiesta di iscrizione*/
-    CHECK(err, write(sockfd, msg, strlen(msg)), "write");
+    CHECK(err, writen(sockfd, msg, strlen(msg)), "writen");
     if(err==-1)
         return False;
 
     /*Messaggio di risposta*/
     char answer[MAXBUFSIZE];
+    memset(answer, 0, MAXBUFSIZE);
     /*aspetto con il primo messaggio la lunghezza effettiva della risposta*/
     
     CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
@@ -57,15 +59,17 @@ int os_store(char *name, void *block, size_t len){
     printf("Invio store, lato client\n");
     /*Messaggio dove inserirò STORE name len \n block*/
     char *msg=(char*) calloc(MAXBUFSIZE+len+1, sizeof(char));
+    memset(msg, 0, MAXBUFSIZE+len+1);
     int err;
     CHECK(err, sprintf(msg, "%s %s %ld \n %s", "STORE", name, len, (char *)block), "sprintf");
 
     size_t msglen=strlen(msg);
     /*Invio il file da salvare*/
-    CHECK(err, write(sockfd, msg, msglen), "write");
+    CHECK(err, writen(sockfd, msg, msglen), "writen");
     printf("%d err, %s\n", err, msg);
     /*Messaggio di risposta del server*/
     char answer[MAXBUFSIZE];
+    memset(answer, 0, MAXBUFSIZE);
     CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
 
     if(strncmp(answer, "OK", 2)==0)
@@ -87,12 +91,14 @@ void *os_retrieve(char *name){
     /*Messaggio dove inserisco retrieve e nome del file da recuperare*/
     int err;
     char msg[MAXBUFSIZE];
+    memset(msg, 0, MAXBUFSIZE);
     CHECK(err, sprintf(msg, "RETRIVE %s \n", name), "sprintf");
     /*Invio il messaggio al server*/
-    CHECK(err, write(sockfd, msg, strlen(msg)), "write");
+    CHECK(err, writen(sockfd, msg, strlen(msg)), "writen");
  
     /*Messaggio di risposta dal server*/
     char answer[MAXBUFSIZE];
+    memset(answer, 0, MAXBUFSIZE);
     CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
 
     char *cont=NULL;
@@ -125,12 +131,14 @@ int os_delete(char *name){
 
     /*Messaggio dove inserisco delete e nome del file da recuperare*/
     char msg[MAXBUFSIZE];
+    memset(msg, 0, MAXBUFSIZE);
     int err;
     CHECK(err, sprintf(msg, "%s %s \n", "DELETE", name), "sprintf");
-    CHECK(err, write(sockfd, msg, strlen(msg)), "write");
+    CHECK(err, writen(sockfd, msg, strlen(msg)), "writen");
 
     /*Messaggio di risposta dal server*/
     char answer[MAXBUFSIZE];
+    memset(answer, 0, MAXBUFSIZE);
     CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
     
     if(strncmp(answer, "OK", 2)==0)
@@ -152,8 +160,9 @@ int os_disconnect(){
     if(err==-1)
         return False;
 
-    char answer[3];
-    CHECK(err, read(sockfd, (char*) answer, 3*sizeof(char)), "read");
+    char answer[4];
+    memset(answer, 0, 4);
+    CHECK(err, read(sockfd, (char*) answer, 4*sizeof(char)), "read");
     if(err==-1)
         return False;
     fprintf(stdout, "Disconnessione: %s\n", answer);
