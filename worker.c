@@ -79,6 +79,7 @@ void w_register(char *cont, int client_fd){
 
 void w_store(char *cont, int client_fd){
     char filepath[UNIX_PATH_MAX];
+    int b_read=6;
 
     printf("Inizio store lato server\n");
     /*Lavoro in mutua esclusione*/
@@ -97,21 +98,30 @@ void w_store(char *cont, int client_fd){
     int err;
     /*Creo il nome del file inserendolo direttamente nella cartella del client*/
     CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, strtok_r(cont, " ", &cont)), "sprintf");
+    printf("%s\n", filepath);
+    b_read+=strlen(filepath)-6;
     char *end; 
     long int len=strtol(strtok_r(cont, " ", &cont), &end, 10);
-
+    printf("%ld\n", len);
     char *buffer=(char*) calloc(len+1, sizeof(char));
+    memset(buffer, 0, len+1);
     int f_fd;
     /*Apro il file in lettura/scrittura con l'opzione che deve essere creato se non esistente*/
     CHECK(f_fd, open(filepath, O_CREAT|O_RDWR, 0777), "open");
     /*Elimino dal messaggio " \n "*/
     end=strtok_r(cont, " ", &cont);
     CHECK(err, sprintf(buffer, "%s", cont), "sprintf");
+    printf("cont: %s\n", cont);  
+    /*Fino a qui va bene!!!!!!!*/
 
-    /*Leggo sul canale socket la restante parte del messaggio che non ho letto con fgets poi lo scrivo nel file effettivo*/
-    CHECK(err, read(client_fd, buffer, len+1-strlen(buffer)), "read");
-    CHECK(err, write(f_fd, buffer, strlen(buffer)), "write");
-
+    if(len+b_read>MAXBUFSIZE){
+        /*Leggo sul canale socket la restante parte del messaggio che non ho letto con fgets poi lo scrivo nel file effettivo*/
+        CHECK(err, read(client_fd, buffer, len+1-strlen(buffer)), "read");
+        CHECK(err, writen(f_fd, buffer, strlen(buffer)), "writen");
+    } else {
+        CHECK(err, writen(f_fd, buffer, strlen(buffer)), "writen");
+    }
+    
     pthread_mutex_lock(&mtx);
     while(!ready)
         pthread_cond_wait(&mod, &mtx);
@@ -122,16 +132,17 @@ void w_store(char *cont, int client_fd){
         tot_size+=len;/* condition */
         n_obj++;
         CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
-        CHECK(err, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+        CHECK(err, writen(client_fd, response, strlen(response)*sizeof(char)), "writen");
     } else {
-        CHECK(err, sprintf(response, "%s", "KO, salvataggio file non riuscito"), "sprintf");
-        CHECK(err, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+        CHECK(err, sprintf(response, "%s", "KO salvataggio file non riuscito \n"), "sprintf");
+        CHECK(err, writen(client_fd, response, strlen(response)*sizeof(char)), "writen");
     }
+    printf("Store: %s", response);
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
     /*Rilascio la mutua esclusione in quanto non vado a toccare più variabili condivise*/
-    printf("Store: %s", response);
+    
 }
 
 void w_retrieve(char *cont, int client_fd){
