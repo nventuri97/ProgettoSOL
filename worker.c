@@ -102,16 +102,18 @@ void w_store(char *cont, int client_fd){
     b_read+=strlen(filepath)-6;
     char *end; 
     long int len=strtol(strtok_r(cont, " ", &cont), &end, 10);
-    printf("%ld\n", len);
-    char *buffer=(char*) calloc(len+1, sizeof(char));
-    memset(buffer, 0, len+1);
+
+    char buffer[len+1];
     int f_fd;
     /*Apro il file in lettura/scrittura con l'opzione che deve essere creato se non esistente*/
-    CHECK(f_fd, open(filepath, O_CREAT|O_RDWR, 0777), "open");
+    CHECK(f_fd, open(filepath, O_CREAT|O_RDWR|O_APPEND, 0777), "open");
+
     /*Elimino dal messaggio " \n "*/
     end=strtok_r(cont, " ", &cont);
-    CHECK(err, sprintf(buffer, "%s", cont), "sprintf");
-    printf("cont: %s\n", cont);  
+    /*Inserisco il messaggio, o la prima parte del messaggio*/
+    memset(buffer, 0, len+1);
+    CHECK(err, strcat(buffer, cont), "strcat");
+    printf("cont: %s\n", buffer);
     /*Fino a qui va bene!!!!!!!*/
 
     if(len+b_read>MAXBUFSIZE){
@@ -129,7 +131,7 @@ void w_store(char *cont, int client_fd){
     char response[MAXBUFSIZE];
     memset(response, 0, MAXBUFSIZE);
     if(err!=-1){
-        tot_size+=len;/* condition */
+        tot_size+=len;
         n_obj++;
         CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
         CHECK(err, writen(client_fd, response, strlen(response)*sizeof(char)), "writen");
