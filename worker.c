@@ -80,50 +80,56 @@ void w_register(char *cont, int client_fd){
 void w_store(char *cont, int client_fd){
     char filepath[UNIX_PATH_MAX];
     int b_read=6;
+    int err;
 
-    printf("Inizio store lato server\n");
     /*Lavoro in mutua esclusione*/
     pthread_mutex_lock(&mtx);
     while(!ready)
-        pthread_cond_wait(&mod,&mtx);
-
+        pthread_cond_wait(&mod, &mtx);
+    
     ready=0;
     worker_t *curr=worker_l;
     while(curr->workerfd!=client_fd)
         curr=curr->nxt;
+    char *cl_name=curr->_name;
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
+    /*Rilascio la mutua esclusione*/
 
-    int err;
-    /*Creo il nome del file inserendolo direttamente nella cartella del client*/
-    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, strtok_r(cont, " ", &cont)), "sprintf");
-    printf("%s\n", filepath);
-    b_read+=strlen(filepath)-6;
-    char *end; 
-    long int len=strtol(strtok_r(cont, " ", &cont), &end, 10);
+    char* filename=strtok_r(cont, " ", &cont);
+    b_read+=strlen(filename)+1;             //devo considerare lo spazio con +1
+    /*Costruisco il path del file che devo salvare*/
+    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", cl_name, filename), "sprintf");
 
-    char buffer[len+1];
-    int f_fd;
-    /*Apro il file in lettura/scrittura con l'opzione che deve essere creato se non esistente*/
-    CHECK(f_fd, open(filepath, O_CREAT|O_RDWR|O_APPEND, 0777), "open");
+    /*Prendo la lunghzza del file e la converto*/
+    char *end=strtok_r(cont, " ", &cont);
+    b_read+=strlen(end)+3;
+    int len=strtol(end, NULL, 10);
 
-    /*Elimino dal messaggio " \n "*/
+    /*Elimino il \n, dopo mi rimangono solamente i dati*/
     end=strtok_r(cont, " ", &cont);
-    /*Inserisco il messaggio, o la prima parte del messaggio*/
-    memset(buffer, 0, len+1);
-    CHECK(err, strcat(buffer, cont), "strcat");
-    printf("cont: %s\n", buffer);
-    /*Fino a qui va bene!!!!!!!*/
 
-    if(len+b_read>MAXBUFSIZE){
-        /*Leggo sul canale socket la restante parte del messaggio che non ho letto con fgets poi lo scrivo nel file effettivo*/
-        CHECK(err, read(client_fd, buffer, len+1-strlen(buffer)), "read");
-        CHECK(err, writen(f_fd, buffer, strlen(buffer)), "writen");
+    char f_buffer[len+1];
+    memset(f_buffer, 0, len+1);
+    int f_fd;                               //file descriptor del file che devo salvare
+    /*Apro il file con opzione RDWR, CREAT*/
+    CHECK(f_fd, open(filepath, O_CREAT|O_RDWR, 0777), "open");
+
+    b_read=MAXBUFSIZE-b_read;
+    if(len<=b_read){
+        /*I dati sono tutti nell'header*/
+        CHECK(err, writen(f_fd, cont, len), "writen");
     } else {
-        CHECK(err, writen(f_fd, buffer, strlen(buffer)), "writen");
+        CHECK(err, writen(f_fd, cont, b_read), "writen");
+        /*Leggo la restante parte dei dati e li scrivo sul file*/
+        int rest=len-b_read;
+        CHECK(err, read(client_fd, f_buffer, rest), "read");
+        CHECK(err, writen(f_fd, f_buffer, rest), "writen");
+        /*Chiudo il file descriptor*/
+        CHECK(err, close(f_fd), "close");
     }
-    
+
     pthread_mutex_lock(&mtx);
     while(!ready)
         pthread_cond_wait(&mod, &mtx);
@@ -143,8 +149,6 @@ void w_store(char *cont, int client_fd){
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
-    /*Rilascio la mutua esclusione in quanto non vado a toccare più variabili condivise*/
-    
 }
 
 void w_retrieve(char *cont, int client_fd){
