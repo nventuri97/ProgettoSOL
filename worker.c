@@ -79,6 +79,7 @@ void w_register(char *cont, int client_fd){
 void w_store(char *cont, int client_fd){
     char filepath[UNIX_PATH_MAX];
 
+    printf("Inizio store lato server\n");
     /*Lavoro in mutua esclusione*/
     pthread_mutex_lock(&mtx);
     while(!ready)
@@ -239,26 +240,30 @@ void *worker(void *cl_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
     long int client_fd=(long) cl_fd;
     char cl_msg[MAXBUFSIZE];
-    int p;
-    CHECK(p, read(client_fd, cl_msg, MAXBUFSIZE), "read");
-    
-    /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
-    char *cont;
-    char *keyword=strtok_r(cl_msg, " ", &cont);
-    if(strcmp(keyword,"REGISTER")==0)
-        w_register(cont, client_fd);
-    else if(strcmp(keyword,"STORE")==0)
-        w_store(cont, client_fd);                    
-    else if(strcmp(keyword,"RETRIEVE")==0)
-        w_retrieve(cont, client_fd);                 
-    else if(strcmp(keyword,"DELETE")==0)
-        w_delete(cont, client_fd);                 
-    else if(strcmp(keyword,"LEAVE")==0)
-        w_leave(client_fd);
-    else{
-        char answer_msg[MAXBUFSIZE];
-        CHECK(p, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
-        CHECK(p, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
-    }
+    int err;
+    char *keyword;
+    do {
+        memset(cl_msg,0, MAXBUFSIZE);
+        CHECK(err, read(client_fd, cl_msg, MAXBUFSIZE), "read");
+        
+        /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
+        char *cont;
+        keyword=strtok_r(cl_msg, " ", &cont);
+        printf("%s---%s\n", keyword, cont);
+        if(strcmp(keyword,"REGISTER")==0)
+            w_register(cont, client_fd);
+        else if(strcmp(keyword,"STORE")==0)
+            w_store(cont, client_fd);                    
+        else if(strcmp(keyword,"RETRIEVE")==0)
+            w_retrieve(cont, client_fd);                 
+        else if(strcmp(keyword,"DELETE")==0)
+            w_delete(cont, client_fd);    
+        else{
+            char answer_msg[MAXBUFSIZE];
+            CHECK(err, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
+            CHECK(err, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
+        }
+    } while(strcmp(keyword, "LEAVE")!=0);
+    w_leave(client_fd);
     pthread_exit(NULL);
 }

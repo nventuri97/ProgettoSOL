@@ -54,7 +54,7 @@ int os_store(char *name, void *block, size_t len){
         return False;
     }
     /*Devo decidere se mettere i controlli sul nome e su block*/
-
+    printf("Invio store, lato client\n");
     /*Messaggio dove inserirò STORE name len \n block*/
     char *msg=(char*) calloc(MAXBUFSIZE+len+1, sizeof(char));
     int err;
@@ -63,7 +63,7 @@ int os_store(char *name, void *block, size_t len){
     size_t msglen=strlen(msg);
     /*Invio il file da salvare*/
     CHECK(err, write(sockfd, msg, msglen), "write");
-
+    printf("%d err, %s\n", err, msg);
     /*Messaggio di risposta del server*/
     char answer[MAXBUFSIZE];
     CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
