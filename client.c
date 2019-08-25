@@ -151,7 +151,7 @@ void retrieve_test(){
 
         /*Eseguo la retrive*/
         void *data=os_retrieve(filename);
-        if(strcmp((char *) data, trainingData[i])==0){
+        if(strcmp(data, trainingData[i])==0){
             fprintf(stdout, "Recupero dati riuscito\n");
             success++;
         } else {

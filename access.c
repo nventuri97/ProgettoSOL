@@ -111,7 +111,8 @@ void *os_retrieve(char *name){
         char *end=strtok_r(cont, " ", &cont);
         b_read+=strlen(end)+3;
         int len=strtol(end, NULL, 10);
-        file=(char*) calloc(len, sizeof(char));
+        file=(char*) calloc(len+1, sizeof(char));
+        memset(file, 0, len+1);
         end=strtok_r(cont, " ", &cont);
         if(len<=b_read){
             CHECK(err, sprintf(file, "%s", cont), "sprintf");
