@@ -55,9 +55,11 @@ void w_register(char *cont, int client_fd){
             conn_client++;
         } else if(curr->connected==0){
             /*Client già connesso in precedenza ma ora offline*/
-            (curr->nxt)->prv=new_worker;
+            if((curr->nxt)!=NULL)
+                (curr->nxt)->prv=new_worker;
             new_worker->nxt=curr->nxt;
-            (curr->prv)->nxt=new_worker;
+            if((curr->prv)!=NULL)
+                (curr->prv)->nxt=new_worker;
             new_worker->prv=curr->prv;
             /*Invio il messaggio di riuscita connessione*/
             CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
