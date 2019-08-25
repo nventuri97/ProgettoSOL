@@ -58,7 +58,7 @@ int os_store(char *name, void *block, size_t len){
     /*Devo decidere se mettere i controlli sul nome e su block*/
     printf("Invio store, lato client\n");
     /*Messaggio dove inserirò STORE name len \n block*/
-    char *msg=(char*) calloc(MAXBUFSIZE+len+1, sizeof(char));
+    char msg[MAXBUFSIZE+len+1];
     memset(msg, 0, MAXBUFSIZE+len+1);
     int err;
     CHECK(err, sprintf(msg, "%s %s %ld \n %s", "STORE", name, len, (char *)block), "sprintf");
@@ -160,9 +160,9 @@ int os_disconnect(){
     if(err==-1)
         return False;
 
-    char answer[4];
-    memset(answer, 0, 4);
-    CHECK(err, read(sockfd, (char*) answer, 4*sizeof(char)), "read");
+    char answer[5];
+    memset(answer, 0, 5);
+    CHECK(err, read(sockfd, answer, 5), "read");
     if(err==-1)
         return False;
     fprintf(stdout, "Disconnessione: %s\n", answer);

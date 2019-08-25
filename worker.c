@@ -287,13 +287,15 @@ void *worker(void *cl_fd){
             w_retrieve(cont, client_fd);                 
         else if(strcmp(keyword,"DELETE")==0)
             w_delete(cont, client_fd);    
-        else{
+        else if(strcmp(keyword, "LEAVE")==0){
+            w_leave(client_fd);
+            break;
+        }else{
             char answer_msg[MAXBUFSIZE];
             memset(answer_msg, 0, MAXBUFSIZE);
             CHECK(err, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
             CHECK(err, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
         }
-    } while(strcmp(keyword, "LEAVE")!=0);
-    w_leave(client_fd);
+    } while(True);
     pthread_exit(NULL);
 }
