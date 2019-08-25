@@ -150,8 +150,8 @@ void retrieve_test(){
         sprintf(filename, "t-%d", i+1);
 
         /*Eseguo la retrive*/
-        char *data=os_retrieve(filename);
-        if(strcmp(data, trainingData[i])==0){
+        void *data=os_retrieve(filename);
+        if(strcmp((char *) data, trainingData[i])==0){
             fprintf(stdout, "Recupero dati riuscito\n");
             success++;
         } else {

@@ -106,19 +106,22 @@ void *os_retrieve(char *name){
     void *file=NULL;
 
     if(strcmp(ansmsg,"DATA")==0){
-        /*Verifico che cont contenga i dati necessari*/
-        if(cont!=NULL){
-            char *end, *support;
-            /*Prendo la lunghezza del essaggio*/
-            support=strtok_r(cont, "\n", &cont);
-            long int len=strtol(support, &end, 10);
-
-            file=(char*) calloc(len, sizeof(char));
-            CHECK(err, read(sockfd, file, len), "read");
+        int b_read=5;
+        /*Prendo la lunghezza del file che mi è stato restituito*/
+        char *end=strtok_r(cont, " ", &cont);
+        b_read+=strlen(end)+3;
+        int len=strtol(end, NULL, 10);
+        file=(char*) calloc(len, sizeof(char));
+        end=strtok_r(cont, " ", &cont);
+        if(len<=b_read){
+            CHECK(err, sprintf(file, "%s", cont), "sprintf");
+        } else {
+            CHECK(err, sprintf(file, "%s", cont), "sprintf");
+            int rest=len-b_read;
+            CHECK(err, readn(sockfd, file, rest), "readn");
         }
-        return file;
-    } else
-        fprintf(stderr, "Lettura: %s\n", cont);
+    }else
+        fprintf(stderr, "Lettura: %s %s", ansmsg, cont);
     return file;
 }
 

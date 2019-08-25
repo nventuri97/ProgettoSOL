@@ -175,12 +175,13 @@ void w_retrieve(char *cont, worker_t *cl_curr){
     CHECK(err, stat(filepath, &info), "stat");
     off_t len=info.st_size;
 
-    char buffer[len+1];
+    char data[len+1];
+    char buffer[MAXBUFSIZE+len+1];
     /*Leggo il file e lo salvo nel buffer*/
     CHECK(err, read(f_fd, buffer, len+1), "read");
-    CHECK(err, sprintf(response, "%s %ld \n %s", "OK", len, buffer), "sprintf");
+    CHECK(err, sprintf(buffer, "%s %ld \n %s", "OK", len, data), "sprintf");
 
-    CHECK(err, write(cl_curr->workerfd, response, strlen(response)), "write");
+    CHECK(err, write(cl_curr->workerfd, buffer, strlen(buffer)), "write");
 }
 
 void w_delete(char *cont, worker_t *cl_curr){
