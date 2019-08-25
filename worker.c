@@ -216,6 +216,7 @@ void w_delete(char *cont, int client_fd){
     filename=strtok_r(cont, " ", &cont);
     int err;
     CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
+    printf("%s\n", filepath);
 
     ready=1;
     pthread_cond_signal(&mod);
