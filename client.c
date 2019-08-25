@@ -147,6 +147,7 @@ void retrieve_test(){
     /*Eseguo la retrive di tutti i dati inseriti dal client*/
     for(int i=0;i<20;i++){
         char filename[MAXNAME];
+        memset(filename, 0, MAXNAME);
         sprintf(filename, "t-%d", i+1);
 
         /*Eseguo la retrive*/

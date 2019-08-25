@@ -92,7 +92,7 @@ void *os_retrieve(char *name){
     int err;
     char msg[MAXBUFSIZE];
     memset(msg, 0, MAXBUFSIZE);
-    CHECK(err, sprintf(msg, "RETRIEVE %s \n", name), "sprintf");
+    CHECK(err, sprintf(msg, "%s %s \n","RETRIEVE", name), "sprintf");
     /*Invio il messaggio al server*/
     CHECK(err, writen(sockfd, msg, strlen(msg)), "writen");
  
@@ -123,6 +123,7 @@ void *os_retrieve(char *name){
         }
     }else
         fprintf(stderr, "Lettura: %s %s", ansmsg, cont);
+    printf("%s\n", (char*)file);
     return file;
 }
 
