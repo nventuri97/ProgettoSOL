@@ -5,7 +5,7 @@
 
 #include"worker.h"
 
-void w_register(char *cont, int client_fd){
+worker_t* w_register(char *cont, int client_fd){
     char *cl_name=strtok_r(cont," ", &cont);
     char userpath[UNIX_PATH_MAX];
 
@@ -72,37 +72,24 @@ void w_register(char *cont, int client_fd){
             CHECK(err, sprintf(response, "%s", "KO client già online \n"), "sprintf");
         }
     }
-    
+
     printf("Register: %s", response);
     ready=1;
     pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
+    
+    return new_worker;
 }
 
-void w_store(char *cont, int client_fd){
+void w_store(char *cont, worker_t *cl_curr){
     char filepath[UNIX_PATH_MAX];
     int b_read=6;
     int err;
 
-    /*Lavoro in mutua esclusione*/
-    pthread_mutex_lock(&mtx);
-    while(!ready)
-        pthread_cond_wait(&mod, &mtx);
-    
-    ready=0;
-    worker_t *curr=worker_l;
-    while(curr->workerfd!=client_fd)
-        curr=curr->nxt;
-    char *cl_name=curr->_name;
-    ready=1;
-    pthread_cond_signal(&mod);
-    pthread_mutex_unlock(&mtx);
-    /*Rilascio la mutua esclusione*/
-
     char* filename=strtok_r(cont, " ", &cont);
     b_read+=strlen(filename)+1;             //devo considerare lo spazio con +1
     /*Costruisco il path del file che devo salvare*/
-    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", cl_name, filename), "sprintf");
+    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", cl_curr->_name, filename), "sprintf");
 
     /*Prendo la lunghzza del file e la converto*/
     char *end=strtok_r(cont, " ", &cont);
@@ -126,7 +113,7 @@ void w_store(char *cont, int client_fd){
         CHECK(err, writen(f_fd, cont, b_read), "writen");
         /*Leggo la restante parte dei dati e li scrivo sul file*/
         int rest=len-b_read;
-        CHECK(err, read(client_fd, f_buffer, rest), "read");
+        CHECK(err, read(cl_curr->workerfd, f_buffer, rest), "read");
         CHECK(err, writen(f_fd, f_buffer, rest), "writen");
         /*Chiudo il file descriptor*/
         CHECK(err, close(f_fd), "close");
@@ -142,10 +129,10 @@ void w_store(char *cont, int client_fd){
         tot_size+=len;
         n_obj++;
         CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
-        CHECK(err, writen(client_fd, response, strlen(response)*sizeof(char)), "writen");
+        CHECK(err, writen(cl_curr->workerfd, response, strlen(response)*sizeof(char)), "writen");
     } else {
         CHECK(err, sprintf(response, "%s", "KO salvataggio file non riuscito \n"), "sprintf");
-        CHECK(err, writen(client_fd, response, strlen(response)*sizeof(char)), "writen");
+        CHECK(err, writen(cl_curr->workerfd, response, strlen(response)*sizeof(char)), "writen");
     }
     printf("Store: %s", response);
     ready=1;
@@ -153,9 +140,8 @@ void w_store(char *cont, int client_fd){
     pthread_mutex_unlock(&mtx);
 }
 
-void w_retrieve(char *cont, int client_fd){
+void w_retrieve(char *cont, worker_t *cl_curr){
     char *filename, filepath[UNIX_PATH_MAX];
-    worker_t *curr=worker_l;
     int err;
 
     /*Lavoro in mutua esclusione*/
@@ -165,10 +151,8 @@ void w_retrieve(char *cont, int client_fd){
     
     /*Ricreo il path del file*/
     filename=strtok_r(cont, " ", &cont);
-    while(curr->workerfd!=client_fd)
-        curr=curr->nxt;
     
-    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
+    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", cl_curr->_name, filename), "sprintf");
 
     ready=1;
     pthread_cond_signal(&mod);
@@ -184,7 +168,7 @@ void w_retrieve(char *cont, int client_fd){
     memset(response, 0, MAXBUFSIZE);
     if(f_fd<0){
         CHECK(err, sprintf(response, "%s", "KO il file che hai cercato non esiste \n"), "sprintf");
-        CHECK(err, write(client_fd, response, strlen(response)), "write");
+        CHECK(err, write(cl_curr->workerfd, response, strlen(response)), "write");
         return;
     }
     /*Il file esiste e quindi devo andare a leggerlo*/
@@ -196,12 +180,11 @@ void w_retrieve(char *cont, int client_fd){
     CHECK(err, read(f_fd, buffer, len+1), "read");
     CHECK(err, sprintf(response, "%s %ld \n %s", "OK", len, buffer), "sprintf");
 
-    CHECK(err, write(client_fd, response, strlen(response)), "write");
+    CHECK(err, write(cl_curr->workerfd, response, strlen(response)), "write");
 }
 
-void w_delete(char *cont, int client_fd){
+void w_delete(char *cont, worker_t *cl_curr){
     char *filename;
-    worker_t *curr=worker_l;
 
     /*Lavoro in mutua esclusione*/
     pthread_mutex_lock(&mtx);
@@ -209,13 +192,11 @@ void w_delete(char *cont, int client_fd){
         pthread_cond_wait(&mod,&mtx);
     
     ready=0;
-    while(curr->workerfd!=client_fd)
-        curr=curr->nxt;
 
     char filepath[UNIX_PATH_MAX];
     filename=strtok_r(cont, " ", &cont);
     int err;
-    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", curr->_name, filename), "sprintf");
+    CHECK(err, sprintf(filepath, "%s/%s/%s", "data", cl_curr->_name, filename), "sprintf");
     printf("%s\n", filepath);
 
     ready=1;
@@ -233,27 +214,24 @@ void w_delete(char *cont, int client_fd){
     pthread_mutex_lock(&mtx);
     if(err==0){
         CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
-        CHECK(err, write(client_fd, response, strlen(response)), "write");
+        CHECK(err, write(cl_curr->workerfd, response, strlen(response)), "write");
         n_obj--;
         tot_size-=(int) len;
     } else {
         CHECK(err, sprintf(response, "%s", "KO, rimozione file fallita \n"), "sprintf");
-        CHECK(err, write(client_fd, response, strlen(response)), "write");
+        CHECK(err, write(cl_curr->workerfd, response, strlen(response)), "write");
     }
     pthread_mutex_unlock(&mtx);
 }
 
-void w_leave(int client_fd){
+void w_leave(worker_t *cl_curr){
     /*Gestisco la mia lista in mutua esclusione*/
-    worker_t *curr=worker_l;
     pthread_mutex_lock(&mtx);
     while(!ready)
         pthread_cond_wait(&mod,&mtx);
     ready=0;
 
-    while(curr->workerfd!=client_fd)
-        curr=curr->nxt;
-    curr->connected=0;
+    cl_curr->connected=0;
     conn_client--;
 
     ready=1;
@@ -264,8 +242,8 @@ void w_leave(int client_fd){
     char response[5];
     memset(response, 0, 5);
     CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
-    CHECK(err, write(client_fd, response, 5), "write");
-    CHECKSOCK(err, close(client_fd), "close");
+    CHECK(err, write(cl_curr->workerfd, response, 5), "write");
+    CHECKSOCK(err, close(cl_curr->workerfd), "close");
 }
 
 void *worker(void *cl_fd){
@@ -274,6 +252,7 @@ void *worker(void *cl_fd){
     char cl_msg[MAXBUFSIZE];
     int err;
     char *keyword;
+    worker_t *cl_curr=NULL;
     do {
         memset(cl_msg,0, MAXBUFSIZE);
         CHECK(err, read(client_fd, cl_msg, MAXBUFSIZE), "read");
@@ -283,15 +262,15 @@ void *worker(void *cl_fd){
         keyword=strtok_r(cl_msg, " ", &cont);
         printf("%s---%s\n", keyword, cont);
         if(strcmp(keyword,"REGISTER")==0)
-            w_register(cont, client_fd);
+            cl_curr=w_register(cont, client_fd);
         else if(strcmp(keyword,"STORE")==0)
-            w_store(cont, client_fd);                    
+            w_store(cont, cl_curr);                    
         else if(strcmp(keyword,"RETRIEVE")==0)
-            w_retrieve(cont, client_fd);                 
+            w_retrieve(cont, cl_curr);                 
         else if(strcmp(keyword,"DELETE")==0)
-            w_delete(cont, client_fd);    
+            w_delete(cont, cl_curr);    
         else if(strcmp(keyword, "LEAVE")==0){
-            w_leave(client_fd);
+            w_leave(cl_curr);
             break;
         }else{
             char answer_msg[MAXBUFSIZE];
