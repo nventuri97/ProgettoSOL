@@ -122,7 +122,9 @@ void *os_retrieve(char *name){
             strncat(file, cont, b_read);            
             //printf("2.cont: %s\n", cont);
             int rest=len-b_read;
-            CHECK(err, readn(sockfd, &file[b_read], rest*sizeof(char)), "readn");
+            char tmp[rest+1];
+            CHECK(err, readn(sockfd, tmp, rest*sizeof(char)), "readn");
+            strncat(file, tmp, rest);
         }
     }else
         fprintf(stderr, "Lettura: %s %s", ansmsg, cont);

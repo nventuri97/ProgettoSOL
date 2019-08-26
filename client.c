@@ -160,6 +160,7 @@ void retrieve_test(){
             failure++;
         }
         tot_test++;
+        free(data);
     }
 }
 
