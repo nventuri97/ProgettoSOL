@@ -100,11 +100,12 @@ void *os_retrieve(char *name){
     char answer[MAXBUFSIZE];
     memset(answer, 0, MAXBUFSIZE);
     CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
-
+    printf("%s\n", answer);
+    printf("CAZZOOOOO\n");
     char *cont=NULL;
     char *ansmsg=strtok_r(answer, " ", &cont);
     void *file=NULL;
-
+    
     if(strcmp(ansmsg,"DATA")==0){
         int b_read=5;
         /*Prendo la lunghezza del file che mi è stato restituito*/
@@ -114,10 +115,13 @@ void *os_retrieve(char *name){
         file=(char*) calloc(len+1, sizeof(char));
         memset(file, 0, len+1);
         end=strtok_r(cont, " ", &cont);
+        b_read=MAXBUFSIZE-b_read;
         if(len<=b_read){
-            CHECK(err, sprintf(file, "%s", cont), "sprintf");
+            memcpy(file,cont,b_read);
+            printf("file: %s\n", (char*)file);
         } else {
-            CHECK(err, sprintf(file, "%s", cont), "sprintf");
+            memcpy(file,cont,b_read);
+            printf("2.cont: %s\n", cont);
             int rest=len-b_read;
             CHECK(err, readn(sockfd, file, rest), "readn");
         }
