@@ -122,6 +122,7 @@ void store_test(){
     /*Avvio un ciclo che mi fa la store dei 20 dati che ho generato con training_data()*/
     for(int i=0;i<20;i++){
         char filename[MAXNAME];
+        memset(filename, 0, MAXNAME);
         sprintf(filename, "t-%d", i+1);
         size_t i_size=strlen(trainingData[i]);
 
@@ -168,6 +169,7 @@ void delete_test(){
     /*Inizializzo direttamente i nomi dei file e mando la delete*/
     for(int i=0;i<20;i++){
         char filename[MAXNAME];
+        memset(filename, 0, MAXNAME);
         int err;
         CHECK(err, sprintf(filename, "t-%d", i+1),"sprintf");
 
