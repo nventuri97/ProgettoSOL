@@ -181,7 +181,7 @@ void w_retrieve(char *cont, worker_t *cl_curr){
     memset(buffer, 0, MAXBUFSIZE+len+1);
     /*Leggo il file e lo salvo nel buffer*/
     CHECK(err, readn(f_fd, data, len+1), "readn");
-    CHECK(err, sprintf(buffer, "%s %ld \n %s", "OK", len, data), "sprintf");
+    CHECK(err, sprintf(buffer, "%s %ld \n %s", "DATA", len, data), "sprintf");
     printf("%s\n", buffer);
     CHECK(err, write(cl_curr->workerfd, buffer, strlen(buffer)), "write");
 }

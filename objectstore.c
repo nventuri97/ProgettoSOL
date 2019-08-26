@@ -11,6 +11,7 @@
 
 int main(int argc, char *argv[]){
     /*creazione della server socket */
+    unlink(SOCKNAME);
     int serverfd;
     CHECKSOCK(serverfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
 
