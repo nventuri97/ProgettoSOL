@@ -101,7 +101,7 @@ void *os_retrieve(char *name){
     memset(answer, 0, MAXBUFSIZE);
     CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
     printf("%s\n", answer);
-    printf("CAZZOOOOO\n");
+
     char *cont=NULL;
     char *ansmsg=strtok_r(answer, " ", &cont);
     void *file=NULL;
@@ -113,17 +113,16 @@ void *os_retrieve(char *name){
         b_read+=strlen(end)+3;
         int len=strtol(end, NULL, 10);
         file=(char*) calloc(len+1, sizeof(char));
-        memset(file, 0, len+1);
         end=strtok_r(cont, " ", &cont);
         b_read=MAXBUFSIZE-b_read;
         if(len<=b_read){
-            memcpy(file,cont,b_read);
-            printf("file: %s\n", (char*)file);
+            strncat(file, cont, b_read);
+            //printf("file: %s\n", (char*)file);
         } else {
-            memcpy(file,cont,b_read);
-            printf("2.cont: %s\n", cont);
+            strncat(file, cont, b_read);            
+            //printf("2.cont: %s\n", cont);
             int rest=len-b_read;
-            CHECK(err, readn(sockfd, file, rest), "readn");
+            CHECK(err, readn(sockfd, &file[b_read], rest*sizeof(char)), "readn");
         }
     }else
         fprintf(stderr, "Lettura: %s %s", ansmsg, cont);
