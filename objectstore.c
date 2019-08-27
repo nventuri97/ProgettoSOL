@@ -12,20 +12,21 @@
 int main(int argc, char *argv[]){
     /*creazione della server socket */
     unlink(SOCKNAME);
-    int serverfd;
+    int serverfd, err;
     CHECKSOCK(serverfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
+    CHECK(err, fcntl(serverfd, F_SETFL, O_NONBLOCK), "fcntl");
 
     struct sockaddr_un ssock_addr;
     memset(&ssock_addr, '0', sizeof(ssock_addr));
     ssock_addr.sun_family=AF_UNIX;
     strncpy(ssock_addr.sun_path, SOCKNAME, strlen(SOCKNAME)+1);
 
-    int p;
-    CHECKSOCK(p, bind(serverfd, (struct sockaddr*)&ssock_addr, sizeof(ssock_addr)), "bind");
-    CHECKSOCK(p, listen(serverfd, SOMAXCONN), "listen");
+    
+    CHECKSOCK(err, bind(serverfd, (struct sockaddr*)&ssock_addr, sizeof(ssock_addr)), "bind");
+    CHECKSOCK(err, listen(serverfd, SOMAXCONN), "listen");
 
     /*creazione della cartella DATA */
-    CHECK(p, mkdir("data", 0777), "mkdir");             //posso mettere anche 0700
+    CHECK(err, mkdir("data", 0777), "mkdir");             //posso mettere anche 0700
 
     /*devo lavorare in mutua esclusione sulle variabili condivise*/
     pthread_mutex_lock(&mtx);
@@ -48,9 +49,11 @@ int main(int argc, char *argv[]){
     pthread_t os_worker;
 
     long int clientfd;
-    while(True){
+    here: while(True){
         CHECKSOCK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
-        CHECK(p, pthread_create(&os_worker, NULL, &worker, (void *) clientfd),"pthread_create");
+        if(errno==EAGAIN)
+            goto here;
+        CHECK(err, pthread_create(&os_worker, NULL, &worker, (void *) clientfd),"pthread_create");
     }
     
     return 0;

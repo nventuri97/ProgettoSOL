@@ -4,7 +4,7 @@ INCLUDES = -I .
 LIBS = -lpthread -L.
 
 
-.PHONY : clean cleanall
+.PHONY : clean test
 
 all : objectstore client
 
@@ -28,3 +28,9 @@ clean:
 		-rm -f *.log
 		-rm -f *.sock
 		-rm -rf data
+
+test: 
+		@echo 'Inizio fase di test'
+		seq 1 50 | xargs -n1 -P50 -I{} ./client.o client{} 1 1>>testout.log;
+		(seq 1 30 | xargs -n1 -P30 -I{} ./client.o client{} 2 1>>testout.log) & 
+		(seq 31 50 | xargs -n1 -P20 -I{} ./client.o client{} 3 1>>testout.log) &
