@@ -63,13 +63,14 @@ worker_t* w_register(char *cont, int client_fd){
             new_worker->prv=curr->prv;
             /*Invio il messaggio di riuscita connessione*/
             CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
-            CHECK(err, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+            CHECK(err, writen(client_fd, response, strlen(response)*sizeof(char)), "writen");
             free(curr);
             conn_client++;
         } else if(curr->connected==1){
             /*Client online*/
             free(new_worker);
             CHECK(err, sprintf(response, "%s", "KO client già online \n"), "sprintf");
+            CHECK(err, writen(client_fd, response, strlen(response)*sizeof(char)), "writen");
         }
     }
 
@@ -187,25 +188,13 @@ void w_retrieve(char *cont, worker_t *cl_curr){
 }
 
 void w_delete(char *cont, worker_t *cl_curr){
-    char *filename;
-
-    /*Lavoro in mutua esclusione*/
-    pthread_mutex_lock(&mtx);
-    while(!ready)
-        pthread_cond_wait(&mod,&mtx);
-    
-    ready=0;
-
     char filepath[UNIX_PATH_MAX];
-    filename=strtok_r(cont, " ", &cont);
+    memset(filepath, 0, UNIX_PATH_MAX);
+    char *filename=strtok_r(cont, " ", &cont);
     int err;
     CHECK(err, sprintf(filepath, "%s/%s/%s", "data", cl_curr->_name, filename), "sprintf");
     printf("%s\n", filepath);
 
-    ready=1;
-    pthread_cond_signal(&mod);
-    pthread_mutex_unlock(&mtx);
-    /*Rilascio la mutua esclusione in quanto non vado a toccare più variabili condivise*/
     /*Devo prendere la lunghezza per poi toglierla dalla dimensione totale dell'objectstore*/
     struct stat info;
     CHECK(err, stat(filepath, &info), "stat");
