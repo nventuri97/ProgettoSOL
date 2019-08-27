@@ -22,12 +22,12 @@ worker_t* w_register(char *cont, int client_fd){
     worker_t *new_worker=(worker_t*) malloc(sizeof(worker_t));
     new_worker->connected=1;
     new_worker->workerfd=client_fd;
+    new_worker->nxt=NULL;
+    new_worker->prv=NULL;
     CHECK(err, sprintf(new_worker->_name, "%s", cl_name), "sprintf");
     /*Nessun client ancora registrato*/
     if(worker_l==NULL){
         worker_l=new_worker;
-        worker_l->nxt=NULL;
-        worker_l->prv=NULL;
         /*Creo la cartella del client in cui andrò a inserire i file*/
         CHECK(err, sprintf(userpath, "%s/%s", "data", cl_name), "sprintf");
         mkdir(userpath, 0777);
@@ -41,7 +41,7 @@ worker_t* w_register(char *cont, int client_fd){
         /*Cerco se l'utente si è già connesso in precedenza*/
         while(strcmp(curr->_name, cl_name)!=0 && curr->nxt!=NULL)
             curr=curr->nxt;
-        /*Utente non ancora connesso*/
+        /*Utente non ancora connesso, sono in fondo alla lista*/
         if(curr->nxt==NULL && strcmp(curr->_name, cl_name)!=0){
             new_worker->nxt=worker_l;
             worker_l->prv=new_worker;
@@ -55,12 +55,13 @@ worker_t* w_register(char *cont, int client_fd){
             conn_client++;
         } else if(curr->connected==0){
             /*Client già connesso in precedenza ma ora offline*/
-            if((curr->nxt)!=NULL)
-                (curr->nxt)->prv=new_worker;
-            new_worker->nxt=curr->nxt;
-            if((curr->prv)!=NULL)
-                (curr->prv)->nxt=new_worker;
-            new_worker->prv=curr->prv;
+            new_worker->nxt=worker_l;
+            worker_l->prv=new_worker;
+            worker_l=new_worker;
+            if(curr->nxt!=NULL)
+                (curr->nxt)->prv=curr->prv;
+            if(curr->prv!=NULL)
+                (curr->prv)->nxt=curr->nxt;
             /*Invio il messaggio di riuscita connessione*/
             CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
             CHECK(err, writen(client_fd, response, strlen(response)*sizeof(char)), "writen");
