@@ -31,6 +31,21 @@ clean:
 
 test: 
 		@echo 'Inizio fase di test'
-		seq 1 50 | xargs -n1 -P50 -I{} ./client.o client{} 1 1>>testout.log;
-		(seq 1 30 | xargs -n1 -P30 -I{} ./client.o client{} 2 1>>testout.log) & 
-		(seq 31 50 | xargs -n1 -P20 -I{} ./client.o client{} 3 1>>testout.log) &
+		for((i=0;i<50;i++))
+		do
+			./client.o client$i 1 >>testou.log &
+		done
+
+		wait
+
+		for((i=0;i<30;i++))
+		do
+			./client.o client$i 2 >>testou.log &
+		done
+
+		for((i=30;i<50;i++))
+		do
+			./client.o client$i 3 >>testou.log &
+		done
+
+		wait
