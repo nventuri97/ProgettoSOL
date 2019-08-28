@@ -36,11 +36,11 @@ int os_connect(char *name){
         return False;
 
     /*Messaggio di risposta*/
-    char answer[MAXBUFSIZE];
-    memset(answer, 0, MAXBUFSIZE);
+    char answer[MAXBUFSIZE+1];
+    memset(answer, 0, MAXBUFSIZE+1);
     /*aspetto con il primo messaggio la lunghezza effettiva della risposta*/
     
-    CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
+    CHECK(err, read_to_new(sockfd, answer, MAXBUFSIZE), "read");
     printf("Connect: %s", answer);
     if(strncmp(answer,"OK", 2)==0)
         return True;
@@ -68,9 +68,9 @@ int os_store(char *name, void *block, size_t len){
     CHECK(err, writen(sockfd, msg, msglen), "writen");
     printf("%d err, %s\n", err, msg);
     /*Messaggio di risposta del server*/
-    char answer[MAXBUFSIZE];
-    memset(answer, 0, MAXBUFSIZE);
-    CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
+    char answer[MAXBUFSIZE+1];
+    memset(answer, 0, MAXBUFSIZE+1);
+    CHECK(err, read_to_new(sockfd, answer, MAXBUFSIZE), "read");
 
     if(strncmp(answer, "OK", 2)==0)
         return True;
@@ -97,9 +97,9 @@ void *os_retrieve(char *name){
     CHECK(err, writen(sockfd, msg, strlen(msg)), "writen");
  
     /*Messaggio di risposta dal server*/
-    char answer[MAXBUFSIZE];
-    memset(answer, 0, MAXBUFSIZE);
-    CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
+    char answer[MAXBUFSIZE+1];
+    memset(answer, 0, MAXBUFSIZE+1);
+    CHECK(err, read_to_new(sockfd, answer, MAXBUFSIZE), "read");
     printf("%s\n", answer);
 
     char *cont=NULL;
@@ -147,9 +147,9 @@ int os_delete(char *name){
     CHECK(err, writen(sockfd, msg, strlen(msg)), "writen");
 
     /*Messaggio di risposta dal server*/
-    char answer[MAXBUFSIZE];
-    memset(answer, 0, MAXBUFSIZE);
-    CHECK(err, read(sockfd, answer, MAXBUFSIZE), "read");
+    char answer[MAXBUFSIZE+1];
+    memset(answer, 0, MAXBUFSIZE+1);
+    CHECK(err, read_to_new(sockfd, answer, MAXBUFSIZE), "read");
     
     if(strncmp(answer, "OK", 2)==0)
         return True;
@@ -172,7 +172,7 @@ int os_disconnect(){
 
     char answer[5];
     memset(answer, 0, 5);
-    CHECK(err, read(sockfd, answer, 5), "read");
+    CHECK(err, read_to_new(sockfd, answer, 5), "read");
     if(err==-1)
         return False;
     fprintf(stdout, "Disconnessione: %s\n", answer);

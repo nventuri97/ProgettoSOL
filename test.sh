@@ -1,12 +1,12 @@
 #!/bin/bash
 echo 'Inizio fase di test'
-for ((i=0;i<5;i++)); do
+for ((i=0;i<10;i++)); do
     ./client.o client$i 1 >>testout.log &
 done
 
 wait
 
-for ((i=0;i<3;i++)); do
+for ((i=0;i<5;i++)); do
     ./client.o client$i 2 >>testout.log &
 done
 

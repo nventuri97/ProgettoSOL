@@ -116,7 +116,7 @@ void w_store(char *cont, worker_t *cl_curr){
         CHECK(err, writen(f_fd, cont, b_read), "writen");
         /*Leggo la restante parte dei dati e li scrivo sul file*/
         int rest=len-b_read;
-        CHECK(err, read(cl_curr->workerfd, f_buffer, rest), "read");
+        CHECK(err, read_to_new(cl_curr->workerfd, f_buffer, rest), "read");
         CHECK(err, writen(f_fd, f_buffer, rest), "writen");
         /*Chiudo il file descriptor*/
         CHECK(err, close(f_fd), "close");
@@ -238,18 +238,18 @@ void *worker(void *cl_fd){
     int err;
     worker_t *cl_curr=NULL;
     do {
-        char cl_msg[MAXBUFSIZE];
-        memset(cl_msg,0, MAXBUFSIZE);
+        char cl_msg[MAXBUFSIZE+1];
+        memset(cl_msg,0, MAXBUFSIZE+1);
         struct pollfd fds;
         fds.fd=client_fd;
         fds.events=POLLIN;
         if(poll(&fds, 1, 10)>=1){
-            CHECK(err, read(client_fd, cl_msg, MAXBUFSIZE), "read");
+            CHECK(err, read_to_new(client_fd, cl_msg, MAXBUFSIZE), "read");
             
             /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
             char *cont;
             char *keyword=strtok_r(cl_msg, " ", &cont);
-            printf("%s---%s\n", keyword, cont);
+            printf("%s---%ld\n", keyword, client_fd);
             if(strcmp(keyword,"REGISTER")==0)
                 cl_curr=w_register(cont, client_fd);
             else if(strcmp(keyword,"STORE")==0)
