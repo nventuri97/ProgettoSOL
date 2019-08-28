@@ -244,7 +244,7 @@ void *worker(void *cl_fd){
         struct pollfd fds;
         fds.fd=client_fd;
         fds.events=POLLIN;
-        if(poll(&fds, 1, 5)>=1){
+        if(poll(&fds, 1, 10)>=1){
             CHECK(err, read(client_fd, cl_msg, MAXBUFSIZE), "read");
             
             /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/

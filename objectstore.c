@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
 
     long int clientfd;
     while(True){
-        if(poll(&fds, 1, 5)>=1){
+        if(poll(&fds, 1, 10)>=1){
             CHECKSOCK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
             CHECK(err, pthread_create(&os_worker, NULL, &worker, (void *) clientfd),"pthread_create");
         }
