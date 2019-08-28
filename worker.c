@@ -1,6 +1,7 @@
 #include<sys/wait.h>
 #include<sys/uio.h>
 #include<sys/socket.h>
+#include<poll.h>
 #include<fcntl.h>
 
 #include"worker.h"
@@ -248,28 +249,33 @@ void *worker(void *cl_fd){
     worker_t *cl_curr=NULL;
     do {
         memset(cl_msg,0, MAXBUFSIZE);
-        CHECK(err, read(client_fd, cl_msg, MAXBUFSIZE), "read");
-        
-        /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
-        char *cont;
-        keyword=strtok_r(cl_msg, " ", &cont);
-        printf("%s---%s\n", keyword, cont);
-        if(strcmp(keyword,"REGISTER")==0)
-            cl_curr=w_register(cont, client_fd);
-        else if(strcmp(keyword,"STORE")==0)
-            w_store(cont, cl_curr);                    
-        else if(strcmp(keyword,"RETRIEVE")==0)
-            w_retrieve(cont, cl_curr);                 
-        else if(strcmp(keyword,"DELETE")==0)
-            w_delete(cont, cl_curr);    
-        else if(strcmp(keyword, "LEAVE")==0){
-            w_leave(cl_curr);
-            break;
-        }else{
-            char answer_msg[MAXBUFSIZE];
-            memset(answer_msg, 0, MAXBUFSIZE);
-            CHECK(err, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
-            CHECK(err, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
+        struct pollfd fds;
+        fds.fd=client_fd;
+        fds.events=POLLIN;
+        if(poll(&fds, 1, 5)>=1){
+            CHECK(err, read(client_fd, cl_msg, MAXBUFSIZE), "read");
+            
+            /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
+            char *cont;
+            keyword=strtok_r(cl_msg, " ", &cont);
+            printf("%s---%s\n", keyword, cont);
+            if(strcmp(keyword,"REGISTER")==0)
+                cl_curr=w_register(cont, client_fd);
+            else if(strcmp(keyword,"STORE")==0)
+                w_store(cont, cl_curr);                    
+            else if(strcmp(keyword,"RETRIEVE")==0)
+                w_retrieve(cont, cl_curr);                 
+            else if(strcmp(keyword,"DELETE")==0)
+                w_delete(cont, cl_curr);    
+            else if(strcmp(keyword, "LEAVE")==0){
+                w_leave(cl_curr);
+                break;
+            }else{
+                char answer_msg[MAXBUFSIZE];
+                memset(answer_msg, 0, MAXBUFSIZE);
+                CHECK(err, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
+                CHECK(err, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
+            }
         }
     } while(True);
     pthread_exit(NULL);

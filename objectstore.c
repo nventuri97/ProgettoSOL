@@ -14,7 +14,6 @@ int main(int argc, char *argv[]){
     unlink(SOCKNAME);
     int serverfd, err;
     CHECKSOCK(serverfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
-    CHECK(err, fcntl(serverfd, F_SETFL, O_NONBLOCK), "fcntl");
 
     struct sockaddr_un ssock_addr;
     memset(&ssock_addr, '0', sizeof(ssock_addr));
@@ -47,14 +46,17 @@ int main(int argc, char *argv[]){
 
     /*dichiaro il worker */
     pthread_t os_worker;
+    struct pollfd fds;
+    fds.fd=serverfd;
+    fds.events=POLLIN;
 
     long int clientfd;
-    here: while(True){
-        CHECKSOCK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
-        if(errno==EAGAIN)
-            goto here;
-        CHECK(err, pthread_create(&os_worker, NULL, &worker, (void *) clientfd),"pthread_create");
+    while(True){
+        if(poll(&fds, 1, 5)>=1){
+            CHECKSOCK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
+            CHECK(err, pthread_create(&os_worker, NULL, &worker, (void *) clientfd),"pthread_create");
+        }
     }
-    
+    CHECKSOCK(err, close(serverfd), "close");
     return 0;
 }

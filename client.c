@@ -153,13 +153,18 @@ void retrieve_test(){
 
         /*Eseguo la retrive*/
         char *data=os_retrieve(filename);
-        if(strcmp(data, trainingData[i])==0){
-            fprintf(stdout, "Recupero dati riuscito\n");
-            success++;
-        } else {
-            fprintf(stderr, "Recupero dati fallito\n");
-            failure++;
-        }
+        if(data!=NULL)
+            if(strcmp(data, trainingData[i])==0){
+                fprintf(stdout, "Recupero dati riuscito\n");
+                success++;
+            } else {
+                fprintf(stderr, "Recupero dati fallito\n");
+                failure++;
+            }
+        else {
+                fprintf(stderr, "Recupero dati fallito\n");
+                failure++;
+            }
         tot_test++;
         free(data);
     }
