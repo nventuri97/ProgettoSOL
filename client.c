@@ -121,8 +121,8 @@ void store_test(){
 
     /*Avvio un ciclo che mi fa la store dei 20 dati che ho generato con training_data()*/
     for(int i=0;i<20;i++){
-        char filename[MAXNAME];
-        memset(filename, 0, MAXNAME);
+        char filename[MAXNAME+1];
+        memset(filename, 0, MAXNAME+1);
         sprintf(filename, "t-%d", i+1);
         size_t i_size=strlen(trainingData[i]);
 
@@ -147,8 +147,8 @@ void retrieve_test(){
 
     /*Eseguo la retrive di tutti i dati inseriti dal client*/
     for(int i=0;i<20;i++){
-        char filename[MAXNAME];
-        memset(filename, 0, MAXNAME);
+        char filename[MAXNAME+1];
+        memset(filename, 0, MAXNAME+1);
         sprintf(filename, "t-%d", i+1);
 
         /*Eseguo la retrive*/
@@ -173,8 +173,8 @@ void retrieve_test(){
 void delete_test(){
     /*Inizializzo direttamente i nomi dei file e mando la delete*/
     for(int i=0;i<20;i++){
-        char filename[MAXNAME];
-        memset(filename, 0, MAXNAME);
+        char filename[MAXNAME+1];
+        memset(filename, 0, MAXNAME+1);
         int err;
         CHECK(err, sprintf(filename, "t-%d", i+1),"sprintf");
 

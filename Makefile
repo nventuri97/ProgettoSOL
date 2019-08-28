@@ -1,4 +1,3 @@
-SHELL := /bin/bash
 CC = gcc
 CFLAGS = -std=c99 -pedantic -Wall -O3 -Wmissing-field-initializers -D_POSIX_C_SOURCE=200809L -fsanitize=address -g -fno-omit-frame-pointer
 INCLUDES = -I .
@@ -30,4 +29,5 @@ clean:
 		-rm -f *.sock
 		-rm -rf data
 
-test: @./test.sh
+test: 
+		@bash test.sh
