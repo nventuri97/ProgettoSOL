@@ -147,19 +147,11 @@ void w_retrieve(char *cont, worker_t *cl_curr){
     char *filename, filepath[UNIX_PATH_MAX];
     int err;
 
-    /*Lavoro in mutua esclusione*/
-    pthread_mutex_lock(&mtx);
-    while(!ready)
-        pthread_cond_wait(&mod, &mtx);
-    
     /*Ricreo il path del file*/
     filename=strtok_r(cont, " ", &cont);
     
     CHECK(err, sprintf(filepath, "%s/%s/%s", "data", cl_curr->_name, filename), "sprintf");
 
-    ready=1;
-    pthread_cond_signal(&mod);
-    pthread_mutex_unlock(&mtx);
     /*Rilascio la mutua esclusione in quanto non vado a toccare più variabili condivise*/
     struct stat info;
 
