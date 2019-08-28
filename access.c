@@ -66,7 +66,6 @@ int os_store(char *name, void *block, size_t len){
     size_t msglen=strlen(msg);
     /*Invio il file da salvare*/
     CHECK(err, writen(sockfd, msg, msglen), "writen");
-    printf("%d err, %s\n", err, msg);
     /*Messaggio di risposta del server*/
     char answer[MAXBUFSIZE+1];
     memset(answer, 0, MAXBUFSIZE+1);
@@ -78,7 +77,6 @@ int os_store(char *name, void *block, size_t len){
         fprintf(stderr, "Salvataggio: %s\n", answer);
         return False;
     }
-    printf("%s", answer);
 }
 
 void *os_retrieve(char *name){
@@ -100,7 +98,6 @@ void *os_retrieve(char *name){
     char answer[MAXBUFSIZE+1];
     memset(answer, 0, MAXBUFSIZE+1);
     CHECK(err, read_to_new(sockfd, answer, MAXBUFSIZE), "read");
-    printf("%s\n", answer);
 
     char *cont=NULL;
     char *ansmsg=strtok_r(answer, " ", &cont);
@@ -128,7 +125,6 @@ void *os_retrieve(char *name){
         }
     }else
         fprintf(stderr, "Lettura: %s %s", ansmsg, cont);
-    printf("%s\n", (char*)file);
     return file;
 }
 
