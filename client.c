@@ -162,7 +162,7 @@ void retrieve_test(){
                 failure++;
             }
         else {
-                fprintf(stderr, "Recupero dati fallito\n");
+                fprintf(stderr, "Dati inesistenti o eliminati in precedenza\n");
                 failure++;
             }
         tot_test++;
