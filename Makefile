@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 CC = gcc
 CFLAGS = -std=c99 -pedantic -Wall -O3 -Wmissing-field-initializers -D_POSIX_C_SOURCE=200809L -fsanitize=address -g -fno-omit-frame-pointer
 INCLUDES = -I .
@@ -29,20 +30,4 @@ clean:
 		-rm -f *.sock
 		-rm -rf data
 
-test: 
-		@echo 'Inizio fase di test'
-		for ((i=0; i<50; i++)); do
-			./client.o client$i 1 >>testou.log &
-		done
-
-		wait
-
-		for ((i=0; i<30; i++)); do
-			./client.o client$i 2 >>testou.log &
-		done
-
-		for ((i=30; i<50; i++)); do
-			./client.o client$i 3 >>testou.log &
-		done
-
-		wait
+test: @./test.sh

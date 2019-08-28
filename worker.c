@@ -235,11 +235,10 @@ void w_leave(worker_t *cl_curr){
 void *worker(void *cl_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
     long int client_fd=(long) cl_fd;
-    char cl_msg[MAXBUFSIZE];
     int err;
-    char *keyword;
     worker_t *cl_curr=NULL;
     do {
+        char cl_msg[MAXBUFSIZE];
         memset(cl_msg,0, MAXBUFSIZE);
         struct pollfd fds;
         fds.fd=client_fd;
@@ -249,7 +248,7 @@ void *worker(void *cl_fd){
             
             /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
             char *cont;
-            keyword=strtok_r(cl_msg, " ", &cont);
+            char *keyword=strtok_r(cl_msg, " ", &cont);
             printf("%s---%s\n", keyword, cont);
             if(strcmp(keyword,"REGISTER")==0)
                 cl_curr=w_register(cont, client_fd);
