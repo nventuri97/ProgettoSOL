@@ -3,14 +3,14 @@
 
 #define _POSIX_C_SOURCE 200809L
 #include"util.h"
-#include"signal_t.h"
+#include<signal.h>
 #include<dirent.h>
 
 /*variabili condivise tra il main e i vari thread worker */
 static pthread_mutex_t mtx=PTHREAD_MUTEX_INITIALIZER;
 
 //#client connessi, size totale dell'object store, #totale di oggetti
-volatile sig_atomic_t conn_client, tot_size, n_obj, serveronline;
+static volatile sig_atomic_t conn_client, tot_size, n_obj, serveronline;
 
 /*struct per definire la lista di worker collegati ad un client*/
 typedef struct worker{

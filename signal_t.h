@@ -2,6 +2,7 @@
 #define SIGNAL_T
 
 #include"util.h"
+#include"worker.h"
 #include<signal.h>
 
 extern pthread_t create_signal_t();

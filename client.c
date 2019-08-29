@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
         failure++;
         tot_test++;
         perror("connect");
-        print_report();
+        c_print_report();
         return EXIT_FAILURE;
     }
 
@@ -85,11 +85,11 @@ int main(int argc, char *argv[]){
         tot_test++;
     }
     
-    print_report();
+    c_print_report();
     return 0;
 }
 
-void print_report(){
+void c_print_report(){
     fprintf(stdout, "REPORT FINALE:\n");
     fprintf(stdout, "1) Tentativi conclusi con successo: %d\n 2) Tentativi falliti: %d\n 3) Tentativi totali %d\n", success, failure, tot_test);
 }

@@ -9,6 +9,8 @@
 #include"worker.h"
 #include"signal_t.h"
 
+void s_print_report();
+
 int main(int argc, char *argv[]){
     /*creazione della server socket */
     unlink(SOCKNAME);
@@ -39,14 +41,15 @@ int main(int argc, char *argv[]){
 
     pthread_mutex_unlock(&mtx);
 
-    /*dichiaro il worker */
+    /*dichiaro il worker e il signaller */
     pthread_t os_worker;
+    pthread_t os_signaller=create_signal_t();
     struct pollfd fds;
     fds.fd=serverfd;
     fds.events=POLLIN;
 
     long int clientfd;
-    while(serveronline==1){
+    while(serveronline){
         if(poll(&fds, 1, 10)>=1){
             CHECKSOCK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
             CHECK(err, pthread_create(&os_worker, NULL, &worker, (void *) clientfd),"pthread_create");
@@ -55,4 +58,16 @@ int main(int argc, char *argv[]){
     }
     CHECKSOCK(err, close(serverfd), "close");
     return 0;
+}
+
+void s_print_report(){
+    fprintf(stdout, "SIGUSR1 catturato\n");
+    fprintf(stdout, "Client connessi: %d\n", conn_client);
+    fprintf(stdout, "Oggetti memorizzati nell'object store: %d\n", n_obj);
+
+    if(tot_size>1024)
+        fprintf(stdout, "Dimensione dell'objectstore: %d Mb\n", tot_size/1024);
+    else
+        fprintf(stdout, "Dimensione dell'objectstore: %d Kb\n", tot_size);
+    
 }

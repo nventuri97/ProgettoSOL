@@ -224,7 +224,7 @@ void *worker(void *cl_fd){
     long int client_fd=(long) cl_fd;
     int err;
     worker_t *cl_curr=NULL;
-    while(serveronline==1) {
+    while(serveronline) {
         char cl_msg[MAXBUFSIZE+1];
         memset(cl_msg,0, MAXBUFSIZE+1);
         struct pollfd fds;

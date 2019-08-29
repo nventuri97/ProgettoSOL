@@ -8,7 +8,7 @@ LIBS = -lpthread -L.
 
 all : objectstore client
 
-objectstore: objectstore.c worker.c worker.h util.h
+objectstore: objectstore.c worker.c signal_t.c worker.h util.h signal_t.h  
 	$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@.o $(LIBS)
 
 
