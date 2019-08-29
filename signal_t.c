@@ -2,20 +2,18 @@
 #include"signal_t.h"
 
 sigset_t mask;
-int signal;
+int sig;
 
-pthread_t create_signal_t(){
-    int err;
-    /*Imposto a 1 le posizioni della mashera dei segnali*/
-    CHECK(err, sigfillset(&mask), "sigfillset");
+void s_print_report(){
+    fprintf(stdout, "SIGUSR1 catturato\n");
+    fprintf(stdout, "Client connessi: %d\n", conn_client);
+    fprintf(stdout, "Oggetti memorizzati nell'object store: %d\n", n_obj);
 
-    /*Posso utilizzare siprocmask perché lavoro sul processo del server*/
-    CHECK(err, sigprocmask(SIG_BLOCK, &mask, NULL), "sigprocmask");
-
-    pthread_t signaller;
-    CHECK(err, pthread_create(&signaller, NULL, signaller, NULL), "pthread_create");
-    CHECK(err, pthread_detach(signaller), "pthread_detach")
-    return signaller;
+    if(tot_size>1024)
+        fprintf(stdout, "Dimensione dell'objectstore: %d Mb\n", tot_size/1024);
+    else
+        fprintf(stdout, "Dimensione dell'objectstore: %d Kb\n", tot_size);
+    
 }
 
 void *signaller(){
@@ -30,8 +28,8 @@ void *signaller(){
 
     while(serveronline){
         /*Aspetto che arrivi uno dei segnali settati dentro mask*/
-        sigwait(&mask, &signal);
-        switch (signal){
+        sigwait(&mask, &sig);
+        switch (sig){
         case SIGINT:
             serveronline=0;
             break;
@@ -43,4 +41,18 @@ void *signaller(){
             break;
         }
     }
+}
+
+pthread_t create_signal_t(){
+    int err;
+    /*Imposto a 1 le posizioni della mashera dei segnali*/
+    CHECK(err, sigfillset(&mask), "sigfillset");
+
+    /*Posso utilizzare siprocmask perché lavoro sul processo del server*/
+    CHECK(err, sigprocmask(SIG_BLOCK, &mask, NULL), "sigprocmask");
+
+    pthread_t os_signaller;
+    CHECK(err, pthread_create(&os_signaller, NULL, &signaller, NULL), "pthread_create");
+    CHECK(err, pthread_detach(os_signaller), "pthread_detach")
+    return signaller;
 }

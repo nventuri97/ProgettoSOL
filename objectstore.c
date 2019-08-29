@@ -9,8 +9,6 @@
 #include"worker.h"
 #include"signal_t.h"
 
-void s_print_report();
-
 int main(int argc, char *argv[]){
     /*creazione della server socket */
     unlink(SOCKNAME);
@@ -58,16 +56,4 @@ int main(int argc, char *argv[]){
     }
     CHECKSOCK(err, close(serverfd), "close");
     return 0;
-}
-
-void s_print_report(){
-    fprintf(stdout, "SIGUSR1 catturato\n");
-    fprintf(stdout, "Client connessi: %d\n", conn_client);
-    fprintf(stdout, "Oggetti memorizzati nell'object store: %d\n", n_obj);
-
-    if(tot_size>1024)
-        fprintf(stdout, "Dimensione dell'objectstore: %d Mb\n", tot_size/1024);
-    else
-        fprintf(stdout, "Dimensione dell'objectstore: %d Kb\n", tot_size);
-    
 }

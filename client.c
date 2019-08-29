@@ -16,7 +16,7 @@ void training_data();
 void store_test();
 void retrieve_test();
 void delete_test();
-void print_report();
+void c_print_report();
 
 int main(int argc, char *argv[]){
     if(argc<3){
