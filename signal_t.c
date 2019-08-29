@@ -41,6 +41,7 @@ void *signaller(){
             break;
         }
     }
+    return NULL;
 }
 
 pthread_t create_signal_t(){
@@ -54,5 +55,5 @@ pthread_t create_signal_t(){
     pthread_t os_signaller;
     CHECK(err, pthread_create(&os_signaller, NULL, &signaller, NULL), "pthread_create");
     CHECK(err, pthread_detach(os_signaller), "pthread_detach")
-    return signaller;
+    return os_signaller;
 }

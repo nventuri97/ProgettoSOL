@@ -25,11 +25,11 @@ int main(int argc, char *argv[]){
     CHECKSOCK(err, listen(serverfd, SOMAXCONN), "listen");
 
     /*creazione della cartella DATA */
-    CHECK(err, mkdir("data", 0777), "mkdir");             //posso mettere anche 0700
+    CHECK(err, mkdir("data", 0777), "mkdir");
 
     /*devo lavorare in mutua esclusione sulle variabili condivise*/
     pthread_mutex_lock(&mtx);
-    /*inizializzo le variabili condivise tutte a 0*/
+    /*inizializzo le variabili condivise*/
     
     serveronline=1;
     worker_l=NULL;
