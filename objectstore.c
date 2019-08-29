@@ -5,9 +5,9 @@
 #include<fcntl.h>
 #include<poll.h>
 
-#include "util.h"
-#include "worker.h"
-
+#include"util.h"
+#include"worker.h"
+#include"signal_t.h"
 
 int main(int argc, char *argv[]){
     /*creazione della server socket */
@@ -29,19 +29,14 @@ int main(int argc, char *argv[]){
 
     /*devo lavorare in mutua esclusione sulle variabili condivise*/
     pthread_mutex_lock(&mtx);
-    while(!ready)
-        pthread_cond_wait(&mod, &mtx);
     /*inizializzo le variabili condivise tutte a 0*/
-    /*rendo ready occupata, in modo tale che se qualcuno volesse modificare si blocca sulla wait*/
-    ready=0;
+    
+    serveronline=1;
     worker_l=NULL;
     conn_client=0;
     tot_size=0;
     n_obj=0;
-    /*libero ready così chi deve lavorare può lavorare*/
-    ready=1;
 
-    pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
 
     /*dichiaro il worker */
@@ -51,7 +46,7 @@ int main(int argc, char *argv[]){
     fds.events=POLLIN;
 
     long int clientfd;
-    while(True){
+    while(serveronline==1){
         if(poll(&fds, 1, 10)>=1){
             CHECKSOCK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
             CHECK(err, pthread_create(&os_worker, NULL, &worker, (void *) clientfd),"pthread_create");

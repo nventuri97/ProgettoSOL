@@ -12,9 +12,6 @@ worker_t* w_register(char *cont, int client_fd){
 
     /*Lavoro in mutua esclusione*/
     pthread_mutex_lock(&mtx);
-    while(!ready)
-        pthread_cond_wait(&mod,&mtx);
-    ready=0;
 
     int err;
     char response[MAXBUFSIZE];
@@ -77,8 +74,7 @@ worker_t* w_register(char *cont, int client_fd){
     }
 
     printf("Register: %s", response);
-    ready=1;
-    pthread_cond_signal(&mod);
+
     pthread_mutex_unlock(&mtx);
     
     return new_worker;
@@ -123,9 +119,7 @@ void w_store(char *cont, worker_t *cl_curr){
     }
 
     pthread_mutex_lock(&mtx);
-    while(!ready)
-        pthread_cond_wait(&mod, &mtx);
-    ready=0;
+    
     char response[MAXBUFSIZE];
     memset(response, 0, MAXBUFSIZE);
     if(err!=-1){
@@ -138,8 +132,7 @@ void w_store(char *cont, worker_t *cl_curr){
         CHECK(err, writen(cl_curr->workerfd, response, strlen(response)*sizeof(char)), "writen");
     }
     printf("Store: %s", response);
-    ready=1;
-    pthread_cond_signal(&mod);
+
     pthread_mutex_unlock(&mtx);
 }
 
@@ -213,15 +206,9 @@ void w_delete(char *cont, worker_t *cl_curr){
 void w_leave(worker_t *cl_curr){
     /*Gestisco la mia lista in mutua esclusione*/
     pthread_mutex_lock(&mtx);
-    while(!ready)
-        pthread_cond_wait(&mod,&mtx);
-    ready=0;
 
     cl_curr->connected=0;
     conn_client--;
-
-    ready=1;
-    pthread_cond_signal(&mod);
     pthread_mutex_unlock(&mtx);
 
     int err;
@@ -237,7 +224,7 @@ void *worker(void *cl_fd){
     long int client_fd=(long) cl_fd;
     int err;
     worker_t *cl_curr=NULL;
-    do {
+    while(serveronline==1) {
         char cl_msg[MAXBUFSIZE+1];
         memset(cl_msg,0, MAXBUFSIZE+1);
         struct pollfd fds;
@@ -268,6 +255,6 @@ void *worker(void *cl_fd){
                 CHECK(err, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
             }
         }
-    } while(True);
+    }
     pthread_exit(NULL);
 }

@@ -10,8 +10,6 @@
 #include<sys/stat.h>
 #include<errno.h>
 #include<unistd.h>
-#include<signal.h>
-
 
 #define SOCKNAME "./objstore.sock"
 #define True 1

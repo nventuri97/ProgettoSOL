@@ -4,6 +4,8 @@
 #include"util.h"
 #include<signal.h>
 
-pthread_t create_signal_t();
+extern pthread_t create_signal_t();
+
+extern void *signaller();
 
 #endif /*SIGNAL_T*/
