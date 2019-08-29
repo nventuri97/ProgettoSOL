@@ -68,25 +68,24 @@ static inline int writen(long fd, void *buf, size_t size) {
 
 static int read_to_new(int fd ,void* buff,size_t len)
 {
-    size_t byte_left=len;
-    size_t byte_total=0;
-    int find=0;
-    while((byte_total<len)&&(find==0)){
+    int left=len, r_total=0, find=0;
+    while((r_total<len)&&(find==0)){
+        //setto errno a 0 per essere sicuro che sia settato da questa read
         errno=0;
-        size_t byte_readen=read(fd,buff,byte_left);
+        int b_read=read(fd,buff,left);
         if(strchr(buff,'\n')!=NULL)
             find=1;
 
-        if(byte_readen<0){
+        if(b_read<0){
             if(errno==EINTR)
                 continue;
             else
                 return -1;
         }
-        byte_total+=byte_readen;
-        byte_left-=byte_readen;
+        r_total+=b_read;
+        left-=b_read;
     }
-    return byte_total;//strlen(buff)+1;
+    return r_total;
 }
 
 #endif  /* UTIL_H */
