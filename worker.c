@@ -179,7 +179,6 @@ void w_delete(char *cont, worker_t *cl_curr){
     char *filename=strtok_r(cont, " ", &cont);
     int err;
     CHECK(err, sprintf(filepath, "%s/%s/%s", "data", cl_curr->_name, filename), "sprintf");
-    printf("%s\n", filepath);
 
     /*Devo prendere la lunghezza per poi toglierla dalla dimensione totale dell'objectstore*/
     struct stat info;
@@ -200,6 +199,7 @@ void w_delete(char *cont, worker_t *cl_curr){
         CHECK(err, write(cl_curr->workerfd, response, strlen(response)), "write");
     }
     pthread_mutex_unlock(&mtx);
+    printf("Delete: %s", response);
 }
 
 void w_leave(worker_t *cl_curr){
@@ -216,6 +216,7 @@ void w_leave(worker_t *cl_curr){
     CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
     CHECK(err, write(cl_curr->workerfd, response, 5), "write");
     CHECKSOCK(err, close(cl_curr->workerfd), "close");
+    printf("Leave: %s", response);
 }
 
 void *worker(void *cl_fd){
@@ -236,7 +237,6 @@ void *worker(void *cl_fd){
             /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/
             char *cont;
             char *keyword=strtok_r(cl_msg, " ", &cont);
-            printf("%s---%ld\n", keyword, client_fd);
             if(strcmp(keyword,"REGISTER")==0)
                 cl_curr=w_register(cont, client_fd);
             else if(strcmp(keyword,"STORE")==0)

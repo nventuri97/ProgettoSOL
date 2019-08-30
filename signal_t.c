@@ -28,10 +28,11 @@ void *signaller(){
 
         /*Aspetto che arrivi uno dei segnali settati dentro mask*/
         sigwait(&mask, &sig);
-
+        
         switch (sig){
             case SIGINT:
                 serveronline=0;
+                printf("%d\n", serveronline);
                 break;
             case SIGTERM:
                 serveronline=0;
