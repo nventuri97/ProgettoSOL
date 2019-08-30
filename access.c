@@ -56,7 +56,6 @@ int os_store(char *name, void *block, size_t len){
         return False;
     }
     /*Devo decidere se mettere i controlli sul nome e su block*/
-    printf("Invio store, lato client\n");
     /*Messaggio dove inserirò STORE name len \n block*/
     char msg[MAXBUFSIZE+len+1];
     memset(msg, 0, MAXBUFSIZE+len+1);
@@ -162,7 +161,7 @@ int os_disconnect(){
     }
 
     int err;
-    CHECK(err, write(sockfd, "LEAVE \n", 7), "write");
+    CHECK(err, writen(sockfd, "LEAVE \n", 7), "write");
     if(err==-1)
         return False;
 

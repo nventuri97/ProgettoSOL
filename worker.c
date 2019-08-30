@@ -31,7 +31,7 @@ worker_t* w_register(char *cont, int client_fd){
         mkdir(userpath, 0777);
         /*Invio il messaggio di riuscita connessione*/
         CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
-        CHECK(err, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+        CHECK(err, writen(client_fd, response, strlen(response)*sizeof(char)), "writen");
 
         conn_client++;
     }else{
@@ -49,7 +49,7 @@ worker_t* w_register(char *cont, int client_fd){
             mkdir(userpath, 0777);
             /*Invio il messaggio di riuscita connessione*/
             CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
-            CHECK(err, write(client_fd, response, strlen(response)*sizeof(char)), "write");
+            CHECK(err, writen(client_fd, response, strlen(response)*sizeof(char)), "writen");
             conn_client++;
         } else if(curr->connected==0){
             /*Client già connesso in precedenza ma ora offline*/
@@ -156,7 +156,7 @@ void w_retrieve(char *cont, worker_t *cl_curr){
     memset(response, 0, MAXBUFSIZE);
     if(f_fd<0){
         CHECK(err, sprintf(response, "%s", "KO il file che hai cercato non esiste \n"), "sprintf");
-        CHECK(err, write(cl_curr->workerfd, response, strlen(response)), "write");
+        CHECK(err, writen(cl_curr->workerfd, response, strlen(response)), "writen");
         return;
     }
     /*Il file esiste e quindi devo andare a leggerlo*/
@@ -170,7 +170,7 @@ void w_retrieve(char *cont, worker_t *cl_curr){
     /*Leggo il file e lo salvo nel buffer*/
     CHECK(err, readn(f_fd, data, len+1), "readn");
     CHECK(err, sprintf(buffer, "%s %ld \n %s", "DATA", len, data), "sprintf");
-    CHECK(err, write(cl_curr->workerfd, buffer, strlen(buffer)), "write");
+    CHECK(err, writen(cl_curr->workerfd, buffer, strlen(buffer)), "writen");
 }
 
 void w_delete(char *cont, worker_t *cl_curr){
@@ -191,12 +191,12 @@ void w_delete(char *cont, worker_t *cl_curr){
     pthread_mutex_lock(&mtx);
     if(err==0){
         CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
-        CHECK(err, write(cl_curr->workerfd, response, strlen(response)), "write");
+        CHECK(err, writen(cl_curr->workerfd, response, strlen(response)), "writen");
         n_obj--;
         tot_size-=(int) len;
     } else {
         CHECK(err, sprintf(response, "%s", "KO, rimozione file fallita \n"), "sprintf");
-        CHECK(err, write(cl_curr->workerfd, response, strlen(response)), "write");
+        CHECK(err, writen(cl_curr->workerfd, response, strlen(response)), "writen");
     }
     pthread_mutex_unlock(&mtx);
     printf("Delete: %s", response);
@@ -214,7 +214,7 @@ void w_leave(worker_t *cl_curr){
     char response[5];
     memset(response, 0, 5);
     CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
-    CHECK(err, write(cl_curr->workerfd, response, 5), "write");
+    CHECK(err, writen(cl_curr->workerfd, response, 5), "writen");
     CHECKSOCK(err, close(cl_curr->workerfd), "close");
     printf("Leave: %s", response);
 }
