@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
 
     long int clientfd;
     while(serveronline){
-        if(poll(&fds, 1, 10)>=1){
+        if(poll(&fds, 1, 5)>=1){
             CHECKSOCK(clientfd, accept(serverfd, (struct sockaddr *)NULL, NULL), "accept");
             CHECK(err, pthread_create(&os_worker, NULL, &worker, (void *) clientfd),"pthread_create");
             CHECK(err, pthread_detach(os_worker), "pthread_detach");

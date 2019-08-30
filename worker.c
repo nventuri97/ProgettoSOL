@@ -221,6 +221,7 @@ void w_leave(worker_t *cl_curr){
 
 void *worker(void *cl_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
+    printf("WORKERLOOP\n");
     long int client_fd=(long) cl_fd;
     int err;
     worker_t *cl_curr=NULL;
@@ -230,7 +231,7 @@ void *worker(void *cl_fd){
         struct pollfd fds;
         fds.fd=client_fd;
         fds.events=POLLIN;
-        if(poll(&fds, 1, 10)>=1){
+        if(poll(&fds, 1, 5)>=1){
             CHECK(err, read_to_new(client_fd, cl_msg, MAXBUFSIZE), "read");
             
             /*devo capire quale sia la richiesta da parte del client, in base a quella scelgo l'azione da fare*/

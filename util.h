@@ -64,7 +64,7 @@ static inline int writen(long fd, void *buf, size_t size) {
 }
 /*--------------------------------------------------------------------------------------------------------------- */
 
-static int read_to_new(int fd ,void* buff,size_t len)
+static inline int read_to_new(int fd ,void* buff,size_t len)
 {
     int left=len, r_total=0, find=0;
     while((r_total<len)&&(find==0)){
