@@ -1,9 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include"signal_t.h"
 
-sigset_t mask;
-int sig;
-
 void s_print_report(){
     fprintf(stdout, "SIGUSR1 catturato\n");
     fprintf(stdout, "Client connessi: %d\n", conn_client);
@@ -18,33 +15,40 @@ void s_print_report(){
 
 void *signaller(){
     /*Resetto la maschera dei segnali per poi reimpostarla solamente su SIGINT, SIGTERM, SIGUSR1*/
-    int err;
+    sigset_t mask;
+    int err, sig;
     CHECK(err, sigemptyset(&mask), "signemptyset");
     CHECK(err, sigaddset(&mask, SIGINT), "sigaddset");
     CHECK(err, sigaddset(&mask, SIGTERM), "sigaddset");
     CHECK(err, sigaddset(&mask, SIGUSR1), "sigaddset");
 
-    CHECK(err, sigprocmask(SIG_BLOCK, &mask, NULL), "sigprocmask");
-
     while(serveronline){
+        /*Blocco i segnali che ho impostato in mask*/
+        CHECK(err, sigprocmask(SIG_BLOCK, &mask, NULL), "sigprocmask");
+
         /*Aspetto che arrivi uno dei segnali settati dentro mask*/
         sigwait(&mask, &sig);
+
         switch (sig){
-        case SIGINT:
-            serveronline=0;
-            break;
-        case SIGTERM:
-            serveronline=0;
-            break;
-        case SIGUSR1:
-            s_print_report();
-            break;
+            case SIGINT:
+                serveronline=0;
+                break;
+            case SIGTERM:
+                serveronline=0;
+                break;
+            case SIGUSR1:
+                s_print_report();
+                CHECK(err, sigaddset(&mask, SIGINT), "sigaddset");
+                CHECK(err, sigaddset(&mask, SIGTERM), "sigaddset");
+                CHECK(err, sigaddset(&mask, SIGUSR1), "sigaddset");
+                break;
         }
     }
-    return NULL;
+    pthread_exit(NULL);
 }
 
 pthread_t create_signal_t(){
+    sigset_t mask;
     int err;
     /*Imposto a 1 le posizioni della mashera dei segnali*/
     CHECK(err, sigfillset(&mask), "sigfillset");

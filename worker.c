@@ -221,11 +221,12 @@ void w_leave(worker_t *cl_curr){
 
 void *worker(void *cl_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
-    printf("WORKERLOOP\n");
+    //printf("WORKERLOOP\n");
     long int client_fd=(long) cl_fd;
     int err;
     worker_t *cl_curr=NULL;
     while(serveronline) {
+        printf("WORKERLOOOP\n");
         char cl_msg[MAXBUFSIZE+1];
         memset(cl_msg,0, MAXBUFSIZE+1);
         struct pollfd fds;

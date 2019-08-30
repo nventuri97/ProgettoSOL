@@ -8,7 +8,7 @@ LIBS = -lpthread -L.
 
 all : objectstore client
 
-objectstore: objectstore.c worker.c signal_t.c worker.h util.h signal_t.h  
+objectstore: objectstore.c worker.c signal_t.c  
 	$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@.o $(LIBS)
 
 
@@ -18,7 +18,7 @@ client: client.c libaccess.a
 libaccess.a: access.h access.o
 	ar rvs $@ $^
 
-access: access.c util.h
+access: access.c
 	$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@.o $(LIBS)
 
 clean:
