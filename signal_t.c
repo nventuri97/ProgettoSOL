@@ -47,7 +47,7 @@ void *signaller(){
     pthread_exit(NULL);
 }
 
-pthread_t create_signal_t(){
+void create_signal_t(){
     sigset_t mask;
     int err;
     /*Imposto a 1 le posizioni della mashera dei segnali*/
@@ -59,5 +59,4 @@ pthread_t create_signal_t(){
     pthread_t os_signaller;
     CHECK(err, pthread_create(&os_signaller, NULL, &signaller, NULL), "pthread_create");
     CHECK(err, pthread_detach(os_signaller), "pthread_detach")
-    return os_signaller;
 }

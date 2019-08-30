@@ -30,18 +30,19 @@ int main(int argc, char *argv[]){
     /*devo lavorare in mutua esclusione sulle variabili condivise*/
     pthread_mutex_lock(&mtx);
     /*inizializzo le variabili condivise*/
-    
-    serveronline=1;
+
     worker_l=NULL;
     conn_client=0;
     tot_size=0;
     n_obj=0;
 
     pthread_mutex_unlock(&mtx);
+    
+    /*Creo il thread che gestisce i sengali*/
+    create_signal_t();
 
-    /*dichiaro il worker e il signaller */
+    /*dichiaro il worker*/
     pthread_t os_worker;
-    pthread_t os_signaller=create_signal_t();
     struct pollfd fds;
     fds.fd=serverfd;
     fds.events=POLLIN;

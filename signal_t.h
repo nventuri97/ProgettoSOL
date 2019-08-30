@@ -5,7 +5,7 @@
 #include"worker.h"
 #include<signal.h>
 
-extern pthread_t create_signal_t();
+extern void create_signal_t();
 
 extern void *signaller();
 

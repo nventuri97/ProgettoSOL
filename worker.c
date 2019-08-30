@@ -226,7 +226,6 @@ void *worker(void *cl_fd){
     int err;
     worker_t *cl_curr=NULL;
     while(serveronline) {
-        printf("WORKERLOOOP\n");
         char cl_msg[MAXBUFSIZE+1];
         memset(cl_msg,0, MAXBUFSIZE+1);
         struct pollfd fds;
