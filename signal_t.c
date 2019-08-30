@@ -32,7 +32,6 @@ void *signaller(){
         switch (sig){
             case SIGINT:
                 serveronline=0;
-                printf("%d\n", serveronline);
                 break;
             case SIGTERM:
                 serveronline=0;

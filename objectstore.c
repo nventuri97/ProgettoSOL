@@ -9,6 +9,7 @@
 #include"worker.h"
 #include"signal_t.h"
 
+
 int main(int argc, char *argv[]){
     /*creazione della server socket */
     unlink(SOCKNAME);
@@ -31,13 +32,14 @@ int main(int argc, char *argv[]){
     pthread_mutex_lock(&mtx);
     /*inizializzo le variabili condivise*/
 
+    serveronline=1;
     worker_l=NULL;
     conn_client=0;
     tot_size=0;
     n_obj=0;
 
     pthread_mutex_unlock(&mtx);
-    
+
     /*Creo il thread che gestisce i sengali*/
     create_signal_t();
 
