@@ -64,7 +64,7 @@ static inline int writen(long fd, void *buf, size_t size) {
 }
 /*--------------------------------------------------------------------------------------------------------------- */
 
-static inline int read_to_new(int fd ,void* buff,size_t len)
+/*static inline int read_to_new(int fd ,void* buff,size_t len)
 {
     int left=len, r_total=0, find=0;
     while((r_total<len)&&(find==0)){
@@ -84,6 +84,28 @@ static inline int read_to_new(int fd ,void* buff,size_t len)
         left-=b_read;
     }
     return r_total;
+}*/
+
+static inline int read_to_new(long fd, void *buf, size_t size) {
+    size_t left = size;
+    int r, find=0;
+    char *bufptr = (char*)buf;
+    while(left>0 && find==0) {
+        errno=0;
+        if ((r=read((int)fd ,bufptr,left)) == -1) {
+            if (errno == EINTR)
+                continue;
+            return -1;
+        }
+
+        if(strchr(bufptr,'\n'))
+            find=1;
+        if (r == 0)
+            return 0;   // gestione chiusura socket
+        left-=r;
+        bufptr+=r;
+    }
+    return size;
 }
 
 #endif  /* UTIL_H */

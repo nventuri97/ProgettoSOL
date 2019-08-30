@@ -252,7 +252,7 @@ void *worker(void *cl_fd){
                 char answer_msg[MAXBUFSIZE];
                 memset(answer_msg, 0, MAXBUFSIZE);
                 CHECK(err, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
-                CHECK(err, write(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "write");
+                CHECK(err, writen(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "writen");
             }
         }
     }

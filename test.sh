@@ -10,12 +10,10 @@ for ((i=0;i<30;i++)); do
     ./client.o client$i 2 >>testout.log &
 done
 
-wait
-
 for ((i=30;i<50;i++)); do
     ./client.o client$i 3 >>testout.log &
 done
 
 wait
 
-killall -s USR1 server.o
+killall -s USR1 objectstore.o
