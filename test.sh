@@ -16,4 +16,4 @@ done
 
 wait
 
-killall -s USR1 objectstore.o
+killall -SIGUSR1 objectstore.o

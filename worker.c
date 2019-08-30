@@ -171,6 +171,7 @@ void w_retrieve(char *cont, worker_t *cl_curr){
     CHECK(err, readn(f_fd, data, len+1), "readn");
     CHECK(err, sprintf(buffer, "%s %ld \n %s", "DATA", len, data), "sprintf");
     CHECK(err, writen(cl_curr->workerfd, buffer, strlen(buffer)), "writen");
+    CHECK(err, close(f_fd), "close");
 }
 
 void w_delete(char *cont, worker_t *cl_curr){

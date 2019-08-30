@@ -2,6 +2,7 @@
 #include"signal_t.h"
 
 void s_print_report(){
+    fprintf(stdout, "##############################################################\n");
     fprintf(stdout, "SIGUSR1 catturato\n");
     fprintf(stdout, "Client connessi: %d\n", conn_client);
     fprintf(stdout, "Oggetti memorizzati nell'object store: %d\n", n_obj);
@@ -10,7 +11,6 @@ void s_print_report(){
         fprintf(stdout, "Dimensione dell'objectstore: %d Mb\n", tot_size/1024);
     else
         fprintf(stdout, "Dimensione dell'objectstore: %d Kb\n", tot_size);
-    
 }
 
 void *signaller(){
