@@ -10,6 +10,11 @@ non solamente nella os_connect */
 static int sockfd=-1;
 
 int os_connect(char *name){
+    if(name==NULL){
+        fprintf(stderr, "Nome client non valido\n");
+        return False;
+    }
+
     struct sockaddr_un serveraddr;
     CHECKSOCK(sockfd, socket(AF_UNIX, SOCK_STREAM, 0), "socket");
     memset(&serveraddr, '0', sizeof(serveraddr));
@@ -55,7 +60,22 @@ int os_store(char *name, void *block, size_t len){
         fprintf(stderr, "Socket non ancora aperta");
         return False;
     }
-    /*Devo decidere se mettere i controlli sul nome e su block*/
+
+    if(name==NULL){
+        fprintf(stderr, "Nome oggetto non valido\n");
+        return False;
+    }
+
+    if(block==NULL){
+        fprintf(stderr, "Oggetto non valido\n");
+        return False;
+    }
+
+    if(len<0){
+        fprintf(stderr, "Dimensione oggetto non valida\n");
+        return False;
+    }
+
     /*Messaggio dove inserirò STORE name len \n block*/
     char msg[MAXBUFSIZE+len+1];
     memset(msg, 0, MAXBUFSIZE+len+1);
@@ -83,7 +103,11 @@ void *os_retrieve(char *name){
         fprintf(stderr, "Socket non ancora aperta");
         return False;
     }
-    /*Devo decidere se mettere i controlli sul nome del file*/
+    
+    if(name==NULL){
+        fprintf(stderr, "Nome oggetto non valido\n");
+        return False;
+    }
 
     /*Messaggio dove inserisco retrieve e nome del file da recuperare*/
     int err;
@@ -132,7 +156,11 @@ int os_delete(char *name){
         fprintf(stderr, "Socket non ancora aperta");
         return False;
     }
-    /*Devo decidere se mettere i controlli sul nome del file*/
+    
+    if(name==NULL){
+        fprintf(stderr, "Nome oggetto non valido\n");
+        return False;
+    }
 
     /*Messaggio dove inserisco delete e nome del file da recuperare*/
     char msg[MAXBUFSIZE];
