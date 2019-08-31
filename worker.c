@@ -73,7 +73,7 @@ worker_t* w_register(char *cont, int client_fd){
         }
     }
 
-    printf("Register: %s", response);
+    fprintf(stdout, "%s register: %s", new_worker->_name, response);
 
     pthread_mutex_unlock(&mtx);
     
@@ -131,7 +131,7 @@ void w_store(char *cont, worker_t *cl_curr){
         CHECK(err, sprintf(response, "%s", "KO salvataggio file non riuscito \n"), "sprintf");
         CHECK(err, writen(cl_curr->workerfd, response, strlen(response)*sizeof(char)), "writen");
     }
-    printf("Store: %s", response);
+    fprintf(stdout, "%s store: %s",cl_curr->_name, response);
 
     pthread_mutex_unlock(&mtx);
 }
@@ -157,6 +157,7 @@ void w_retrieve(char *cont, worker_t *cl_curr){
     if(f_fd<0){
         CHECK(err, sprintf(response, "%s", "KO il file che hai cercato non esiste \n"), "sprintf");
         CHECK(err, writen(cl_curr->workerfd, response, strlen(response)), "writen");
+        fprintf(stdout, "%s retrieve %s", cl_curr->_name, response);
         return;
     }
     /*Il file esiste e quindi devo andare a leggerlo*/
@@ -172,6 +173,7 @@ void w_retrieve(char *cont, worker_t *cl_curr){
     CHECK(err, sprintf(buffer, "%s %ld \n %s", "DATA", len, data), "sprintf");
     CHECK(err, writen(cl_curr->workerfd, buffer, strlen(buffer)), "writen");
     CHECK(err, close(f_fd), "close");
+    fprintf(stdout, "%s retrieve: OK \n", cl_curr->_name);
 }
 
 void w_delete(char *cont, worker_t *cl_curr){
@@ -200,7 +202,7 @@ void w_delete(char *cont, worker_t *cl_curr){
         CHECK(err, writen(cl_curr->workerfd, response, strlen(response)), "writen");
     }
     pthread_mutex_unlock(&mtx);
-    printf("Delete: %s", response);
+    printf("%s delete: %s",cl_curr->_name, response);
 }
 
 void w_leave(worker_t *cl_curr){
@@ -217,12 +219,11 @@ void w_leave(worker_t *cl_curr){
     CHECK(err, sprintf(response, "%s", "OK \n"), "sprintf");
     CHECK(err, writen(cl_curr->workerfd, response, 5), "writen");
     CHECKSOCK(err, close(cl_curr->workerfd), "close");
-    printf("Leave: %s", response);
+    fprintf(stdout, "%s leave: %s", cl_curr->_name, response);
 }
 
 void *worker(void *cl_fd){
     /*alloco in questo modo poiché le parole chiave hanno lunghezza massima di 8 più uno spazio*/
-    //printf("WORKERLOOP\n");
     long int client_fd=(long) cl_fd;
     int err;
     worker_t *cl_curr=NULL;
@@ -252,8 +253,9 @@ void *worker(void *cl_fd){
             }else{
                 char answer_msg[MAXBUFSIZE];
                 memset(answer_msg, 0, MAXBUFSIZE);
-                CHECK(err, sprintf(answer_msg, "%s", "KO keyword errata"), "sprintf");
+                CHECK(err, sprintf(answer_msg, "%s", "KO keyword errata \n"), "sprintf");
                 CHECK(err, writen(client_fd, answer_msg, strlen(answer_msg)*sizeof(char)+1), "writen");
+                fprintf(stdout, "%s", answer_msg);
             }
         }
     }

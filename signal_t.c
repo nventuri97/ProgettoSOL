@@ -2,8 +2,8 @@
 #include"signal_t.h"
 
 void s_print_report(){
-    fprintf(stdout, "##############################################################\n");
-    fprintf(stdout, "SIGUSR1 catturato\n");
+    fprintf(stdout, "----------------SIGUSR1 catturato----------------\n");
+    fprintf(stdout, "----------------Informazioni object store----------------\n");
     fprintf(stdout, "Client connessi: %d\n", conn_client);
     fprintf(stdout, "Oggetti memorizzati nell'object store: %d\n", n_obj);
 
@@ -32,15 +32,24 @@ void *signaller(){
         switch (sig){
             case SIGINT:
                 serveronline=0;
+                fprintf(stdout, "\n----------------SIGINT ricevuto----------------\n");
+                fprintf(stdout, "----------------Objectstore in chiusura----------------\n");
                 break;
             case SIGTERM:
                 serveronline=0;
+                fprintf(stdout, "\n----------------SIGTERM ricevuto----------------\n");
+                fprintf(stdout, "----------------Objectstore in chiusura----------------\n");
                 break;
             case SIGUSR1:
                 s_print_report();
                 CHECK(err, sigaddset(&mask, SIGINT), "sigaddset");
                 CHECK(err, sigaddset(&mask, SIGTERM), "sigaddset");
                 CHECK(err, sigaddset(&mask, SIGUSR1), "sigaddset");
+                pthread_mutex_lock(&mtx);
+                conn_client=0;
+                n_obj=0;
+                tot_size=0;
+                pthread_mutex_unlock(&mtx);
                 break;
         }
     }
