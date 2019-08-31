@@ -4,7 +4,7 @@ INCLUDES = -I .
 LIBS = -lpthread -L.
 
 
-.PHONY : clean test
+.PHONY : clean test exit1
 
 all : objectstore client
 
@@ -31,3 +31,9 @@ clean:
 
 test: 
 		@bash test.sh
+
+exit1:
+		killall -SIGINT ./objectstore.o
+
+exit2:
+		killall -SIGTERM ./objectstore.o

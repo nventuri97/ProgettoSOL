@@ -32,12 +32,12 @@ void *signaller(){
         switch (sig){
             case SIGINT:
                 serveronline=0;
-                fprintf(stdout, "\n----------------SIGINT ricevuto----------------\n");
+                fprintf(stdout, "----------------SIGINT ricevuto----------------\n");
                 fprintf(stdout, "----------------Objectstore in chiusura----------------\n");
                 break;
             case SIGTERM:
                 serveronline=0;
-                fprintf(stdout, "\n----------------SIGTERM ricevuto----------------\n");
+                fprintf(stdout, "----------------SIGTERM ricevuto----------------\n");
                 fprintf(stdout, "----------------Objectstore in chiusura----------------\n");
                 break;
             case SIGUSR1:
