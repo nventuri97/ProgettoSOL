@@ -90,8 +90,8 @@ int main(int argc, char *argv[]){
 }
 
 void c_print_report(){
-    fprintf(stdout, "REPORT FINALE:\n");
-    fprintf(stdout, "1) Tentativi conclusi con successo: %d\n 2) Tentativi falliti: %d\n 3) Tentativi totali %d\n", success, failure, tot_test);
+    fprintf(stdout, "-----------REPORT FINALE:-----------\n");
+    fprintf(stdout, "1) Tentativi conclusi con successo: %d\n2) Tentativi falliti: %d\n3) Tentativi totali %d\n\n", success, failure, tot_test);
 }
 
 void training_data(){
@@ -131,10 +131,10 @@ void store_test(){
         CHECK(err, os_store(filename, (void *) trainingData[i], i_size), "os_store");
 
         if(err==True){
-            fprintf(stdout, "Dati salvati correttamente\n");
+            fprintf(stdout, "Store: dati salvati correttamente\n");
             success++;
         } else {
-            fprintf(stderr, "Dati non salvati, qualcosa è andato storto\n");
+            fprintf(stderr, "Store: dati non salvati, qualcosa è andato storto\n");
             failure++;
         }
         tot_test++;
@@ -155,14 +155,14 @@ void retrieve_test(){
         char *data=os_retrieve(filename);
         if(data!=NULL)
             if(strcmp(data, trainingData[i])==0){
-                fprintf(stdout, "Recupero dati riuscito\n");
+                fprintf(stdout, "Retrieve: recupero dati riuscito\n");
                 success++;
             } else {
-                fprintf(stderr, "Recupero dati fallito\n");
+                fprintf(stderr, "Retrieve: recupero dati fallito\n");
                 failure++;
             }
         else {
-                fprintf(stderr, "Dati inesistenti o eliminati in precedenza\n");
+                fprintf(stderr, "Retrive: dati inesistenti o eliminati in precedenza\n");
                 failure++;
             }
         tot_test++;
@@ -181,10 +181,10 @@ void delete_test(){
         /*Elimino i dati */
         CHECK(err, os_delete(filename), "os_delete");
         if(err==True){
-            fprintf(stdout, "Dati rimossi correttamente\n");
+            fprintf(stdout, "Delete: dati rimossi correttamente\n");
             success++;
         } else {
-            fprintf(stderr, "Dati non rimossi, qualcosa è andato storto\n");
+            fprintf(stderr, "Delete: dati non rimossi, qualcosa è andato storto\n");
             failure++;
         }
         tot_test++;

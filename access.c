@@ -198,7 +198,7 @@ int os_disconnect(){
     CHECK(err, read_to_new(sockfd, answer, 5), "read");
     if(err==-1)
         return False;
-    fprintf(stdout, "Disconnessione: %s\n", answer);
+    fprintf(stdout, "Disconnessione: %s", answer);
     CHECKSOCK(err, close(sockfd), "close");
     if(err==-1)
         return False;

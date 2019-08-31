@@ -15,5 +15,3 @@ for ((i=30;i<50;i++)); do
 done
 
 wait
-
-killall -SIGUSR1 objectstore.o

@@ -7,10 +7,15 @@ void s_print_report(){
     fprintf(stdout, "Client connessi: %d\n", conn_client);
     fprintf(stdout, "Oggetti memorizzati nell'object store: %d\n", n_obj);
 
-    if(tot_size>1024)
-        fprintf(stdout, "Dimensione dell'objectstore: %d Mb\n", tot_size/1024);
+    pthread_mutex_lock(&mtx);
+    /*Converto la size dello store in Kb*/
+    tot_size=tot_size/1024;
+    pthread_mutex_unlock(&mtx);
+
+    if(tot_size>=1024)
+        fprintf(stdout, "Dimensione dell'objectstore: %f Mb\n",(double) tot_size/1024);
     else
-        fprintf(stdout, "Dimensione dell'objectstore: %d Kb\n", tot_size);
+        fprintf(stdout, "Dimensione dell'objectstore: %f Kb\n",(double) tot_size);
 }
 
 void *signaller(){

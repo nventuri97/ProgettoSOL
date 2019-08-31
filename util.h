@@ -64,28 +64,6 @@ static inline int writen(long fd, void *buf, size_t size) {
 }
 /*--------------------------------------------------------------------------------------------------------------- */
 
-/*static inline int read_to_new(int fd ,void* buff,size_t len)
-{
-    int left=len, r_total=0, find=0;
-    while((r_total<len)&&(find==0)){
-        //setto errno a 0 per essere sicuro che sia settato da questa read
-        errno=0;
-        int b_read=read(fd,buff,left);
-        if(strchr(buff,'\n')!=NULL)
-            find=1;
-
-        if(b_read<0){
-            if(errno==EINTR)
-                continue;
-            else
-                return -1;
-        }
-        r_total+=b_read;
-        left-=b_read;
-    }
-    return r_total;
-}*/
-
 static inline int read_to_new(long fd, void *buf, size_t size) {
     size_t left = size;
     int r, find=0;
