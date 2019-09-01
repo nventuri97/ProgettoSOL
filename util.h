@@ -14,7 +14,7 @@
 #define SOCKNAME "./objstore.sock"
 #define True 1
 #define False 0
-#define MAXNAME 100
+#define MAXNAME 50
 #define MAXBUFSIZE 180
 #define UNIX_PATH_MAX 108
 
